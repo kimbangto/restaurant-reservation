@@ -1,6 +1,7 @@
 package com.sesac.restaurant
 
-fun main() {
-    println("채연 깃 테스트")
-}
+import com.sesac.restaurant.repository.FileManager
 
+fun main() {
+    FileManager // 파일 생성용 임시 코드(추후에 삭제됩니다)
+}
