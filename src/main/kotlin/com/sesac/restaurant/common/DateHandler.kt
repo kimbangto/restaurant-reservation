@@ -8,17 +8,17 @@ object DateHandler {
 
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    fun getToday(): LocalDateTime {
-        val today = LocalDateTime.now()
-
-        return today
-    }
-
-    fun getOneWeekAgo(): LocalDateTime {
-        val date = LocalDateTime.now().plusWeeks(1)
-
-        return date
-    }
+//    fun getToday(): LocalDateTime {
+//        val today = LocalDateTime.now()
+//
+//        return today
+//    }
+//
+//    fun getOneWeekAgo(): LocalDateTime {
+//        val date = LocalDateTime.now().plusWeeks(1)
+//
+//        return date
+//    }
 
     /* 오늘부터 일주일(7일)의 리스트 반환 */
     fun getWeekList(): MutableList<LocalDateTime> {
@@ -32,12 +32,17 @@ object DateHandler {
 
     }
 
-    fun reservationDate(input: String): LocalDateTime {
-        val dateList: List<String> = input.split("-")
+//    fun reservationDate(input: String): LocalDateTime {
+//        val dateList: List<String> = input.split("-")
+//
+//        val date = LocalDateTime.of(dateList[0].toInt(), dateList[1].toInt(), dateList[2].toInt(), dateList[3].toInt(), dateList[4].toInt())
+//
+//        return date
+//    }
 
-        val date = LocalDateTime.of(dateList[0].toInt(), dateList[1].toInt(), dateList[2].toInt(), dateList[3].toInt(), dateList[4].toInt())
+    // reservationMap을 받아서 날짜별로 정렬
+    fun sortMap() {
 
-        return date
     }
 
 }
