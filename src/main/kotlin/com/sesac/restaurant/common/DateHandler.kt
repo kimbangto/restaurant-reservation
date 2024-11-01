@@ -1,12 +1,12 @@
 package com.sesac.restaurant.common
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 /* 날짜 처리 object 클래스 */
 object DateHandler {
 
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+//    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 //    fun getToday(): LocalDateTime {
 //        val today = LocalDateTime.now()
@@ -21,8 +21,8 @@ object DateHandler {
 //    }
 
     /* 오늘부터 일주일(7일)의 리스트 반환 */
-    fun getWeekList(): MutableList<LocalDateTime> {
-        val weekList = mutableListOf(LocalDateTime.now())
+    fun getWeekList(): MutableList<LocalDate> {
+        val weekList = mutableListOf(LocalDate.now())
 
         for (i: Int in 1..6) {
             weekList.add(weekList[0].plusDays(i.toLong()))
@@ -40,9 +40,5 @@ object DateHandler {
 //        return date
 //    }
 
-    // reservationMap을 받아서 날짜별로 정렬
-    fun sortMap() {
-
-    }
 
 }
