@@ -63,17 +63,19 @@ class ReservationController {
 
     // 예약 현황
     fun getReservation() {
-
+        // 예약상황을 날짜별로 모두 출력
+        val reservationMap = reservationService.getReservation()
     }
 
     // 예약 취소
     fun deleteReservation() {
-
+        // 예약 리스트 보여주고 삭제할 예약 선택 후 삭제
+        reservationService.deleteReservation()
     }
 
     // 예약 변경
     fun updateReservation() {
-
+        // 예약 리스트 보여주고 변경할 예약 선택 후 예약 정보 변경)
     }
 
 }
