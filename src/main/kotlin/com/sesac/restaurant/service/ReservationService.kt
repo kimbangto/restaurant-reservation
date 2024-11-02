@@ -6,9 +6,11 @@ import java.time.LocalDate
 
 class ReservationService {
 
+    // 인터페이스 상속받아서 사용?
+
     // 키값을 정수로 guestMap <Long, Guest> 손님 번호, 손님 정보
     // 파일 입출력 시 사용할 map
-    private val guestMap = mutableMapOf<Int, Guest>()
+    private val guestMap = mutableMapOf<String, Guest>()
 
     // reservationMap <Long, Reservation> 예약 번호, 예약 정보
     // 파일 입출력 시 사용할 map
@@ -20,10 +22,7 @@ class ReservationService {
     fun saveGuest(name: String, phoneNumber: String): Guest {
         val guest = Guest(name, phoneNumber)
 
-        // key 값은 guestMap의 키들중 가장 큰 값
-        val key = guestMap.keys.maxOrNull() ?: 0
-
-        guestMap.put(key + 1, guest)
+        guestMap.put(guest.phoneNumber, guest)
         // repository 처리
 
         return guest
@@ -63,6 +62,14 @@ class ReservationService {
     // 예약 삭제
     fun deleteReservation(deleteNum: Int) {
         reservationMap.remove(deleteNum)
+    }
+
+    // 예약 변경
+    fun updateReservation(updateNum: Int, date: LocalDate): Reservation? {
+        // ?.let 으로 null이 아닐때만 let 안의 코드 실행
+        reservationMap[updateNum]?.let { reservation -> reservation.date = date }
+
+        return reservationMap[updateNum]
     }
 
 
