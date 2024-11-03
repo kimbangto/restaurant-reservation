@@ -21,4 +21,8 @@ class GuestRepository private constructor(override val fileIO: FileIO, override 
     suspend fun saveGuest(guest: Guest) =  fileOverwrite({list -> list[guest.phoneNumber] = guest}, { list -> fileIO.parser.guestMapToString(list) })
 
     suspend fun findByPhoneNumber(phoneNumber: String) = getMap()[phoneNumber]
+
+    suspend fun makeVIPByPhoneNumber(phoneNumber: String) = fileOverwrite({ list -> list[phoneNumber]?.isVIP = true}, { list -> fileIO.parser.guestMapToString(list)})
+
+    suspend fun makeBlackListByPhoneNumber(phoneNumber: String) = fileOverwrite({ list -> list[phoneNumber]?.isBlackList = true}, { list -> fileIO.parser.guestMapToString(list)})
 }
