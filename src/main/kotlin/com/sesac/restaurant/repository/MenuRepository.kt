@@ -19,4 +19,6 @@ class MenuRepository private constructor(override val fileIO: FileIO, override v
     override suspend fun getMap(): MenuMap = fileIO.parser.stringToMenuMap((fileIO.readFile(className)))
 
     suspend fun saveMenu(menuName: String, price: Int) = fileOverwrite({ list -> list[menuName] = Menu(menuName, price)}, { list -> fileIO.parser.menuMapToString(list)})
+
+    suspend fun deleteMenu(menuName: String) = fileOverwrite({ list -> list.remove(menuName) }, { list -> fileIO.parser.menuMapToString(list)})
 }
