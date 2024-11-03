@@ -7,4 +7,6 @@ interface Parser {
     fun stringToGuestMap(fileOutput: String?): GuestMap
     fun reservationMapToString(reservationMap: ReservationMap): String
     fun stringToReservationMap(fileOutput: String?): ReservationMap
+    fun menuMapToString(menuMap: MenuMap): String
+    fun stringToMenuMap(fileOutput: String?): MenuMap
 }
