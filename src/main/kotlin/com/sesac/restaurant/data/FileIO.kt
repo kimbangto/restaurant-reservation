@@ -21,6 +21,7 @@ interface FileIO {
 
     fun getDataFilePath(className: String) = "$dbFolderPath\\$className.$fileExtension"
 
+    // 맨 마지막에 코루틴 추가하기
     /** 데이터 클래스마다 맞는 txt 파일이 db 폴더에 있는지 확인하고 없으면 빈 txt 파일을 새로 생성 */
     fun createFile() {
         File(modelPath).listFiles()!!.forEach {
@@ -29,21 +30,18 @@ interface FileIO {
         }
     }
 
-    /** 데이터 클래스의 저장소 텍스트 파일 내용을 읽어옴 */
-    suspend fun readFile(classType: String): String = withContext(Dispatchers.IO) {
-        return@withContext try {
+    /** 데이터 클래스의 저장소 파일 내용을 읽어옴 */
+    suspend fun readFile(classType: String): String? = withContext(Dispatchers.IO) {
+        return@withContext runCatching {
             File(getDataFilePath(classType.replaceFirstChar { it.uppercaseChar() })).readText()
-        } catch (e: FileNotFoundException) {
-            println("존재하지 않는 데이터 타입입니다.")
-            ""
-        }
+        }.onFailure { e -> println(e) }.getOrNull()
     }
 
     /** 데이터 클래스의 저장소 텍스트 파일 덮어쓰기 */
-    fun updateFile(classType: String, updateTxt: String) = CoroutineScope(Dispatchers.IO).launch {
-        try {
+    suspend fun updateFile(classType: String, updateTxt: String) = withContext(Dispatchers.IO) {
+        runCatching {
             File(getDataFilePath(classType.replaceFirstChar { it.uppercaseChar() })).writeText(updateTxt)
-        } catch (e: FileNotFoundException) {
+        }.onFailure {
             println("존재하지 않는 데이터 타입입니다.")
         }
     }
