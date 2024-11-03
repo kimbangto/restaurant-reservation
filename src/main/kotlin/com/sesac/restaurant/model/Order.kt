@@ -1,3 +1,5 @@
 package com.sesac.restaurant.model
 
-data class Order(val table: Table, var order: MutableMap<Menu, Int>)
+import com.sesac.restaurant.common.TableOrderMap
+
+data class Order(val table: Table, var tableOrder: TableOrderMap) {}
