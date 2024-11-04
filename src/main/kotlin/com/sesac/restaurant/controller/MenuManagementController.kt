@@ -3,7 +3,8 @@ package com.sesac.restaurant.controller
 import com.sesac.restaurant.common.ConsoleInput
 import com.sesac.restaurant.service.MenuManagementService
 
-class MenuManagementController(private val menuService: MenuManagementService) {
+class MenuManagementController {
+    private val menuService = MenuManagementService()
 
     suspend fun startMenuManagement() {
         println("1. 메뉴보기 | 2. 메뉴추가 | 3. 메뉴수정 | 4. 메뉴삭제 | 0. 메인콘솔")
