@@ -5,9 +5,9 @@ import com.sesac.restaurant.repository.GuestRepository
 import com.sesac.restaurant.service.BlackListService
 import com.sesac.restaurant.service.VipListService
 
-class CustomerManagementController(guestRepository: GuestRepository) {
-    private val blackListController = BlackListController(BlackListService(guestRepository))
-    private val vipListService = VipListService(guestRepository)
+class CustomerManagementController() {
+    private val blackListController = BlackListController()
+    private val vipListService = VipListService()
 
     // 이 타이밍에 비동기적으로 데이터를 불러와 놔야하는 것인가 블랙리스트, VIP
     suspend fun startCustomerManagement() {
