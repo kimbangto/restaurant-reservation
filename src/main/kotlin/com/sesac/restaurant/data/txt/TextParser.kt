@@ -1,14 +1,8 @@
 package com.sesac.restaurant.data.txt
 
-import com.sesac.restaurant.common.GuestMap
-import com.sesac.restaurant.common.MenuMap
-import com.sesac.restaurant.common.ReservationMap
-import com.sesac.restaurant.common.TableMap
+import com.sesac.restaurant.common.*
 import com.sesac.restaurant.data.Parser
-import com.sesac.restaurant.model.Guest
-import com.sesac.restaurant.model.Menu
-import com.sesac.restaurant.model.Reservation
-import com.sesac.restaurant.model.Table
+import com.sesac.restaurant.model.*
 import java.time.LocalDate
 
 class TextParser: Parser {
@@ -135,12 +129,10 @@ class TextParser: Parser {
                 val dateRegex = """date=([\d-]+)""".toRegex()
                 val date = dateRegex.find(eachLine)?.groupValues?.get(1)?.let { LocalDate.parse(it) }
 
-                // tables 부분 추출
                 val tableListRegex = """tables=\[([^]]*)]""".toRegex()
                 val tables = tableListRegex.find(eachLine)?.groupValues?.get(1)
 
                 if (tables != null) {
-                    // 각 테이블 정보를 추출
                     val tablePattern = """\{([^}]*)}""".toRegex()
                     val tableListString = tablePattern.findAll(tables).map { it.groupValues[1] }.toList()
 
@@ -156,5 +148,44 @@ class TextParser: Parser {
             }
         }
         return map
+    }
+
+    override fun paidTableMapToString(paidTableMap: PaidTableMap): String {
+        var string = ""
+        paidTableMap.forEach { (date, tableOrders) ->
+            string += "date=${date},menu=["
+            tableOrders.forEach{ (menu, count) ->
+                string += "menuName=${menu.name},price=${menu.price},count=${count}"
+            }
+            string.dropLast(1).plus("]").plus("\n")
+        }
+        return string.trim()
+    }
+
+    override fun stringToPaidTableMap(fileOutput: String?): PaidTableMap {
+        val paidTableMap:PaidTableMap = mutableMapOf()
+
+        if(fileOutput !== null) {
+            fileOutput.split("\n").forEach { eachLine ->
+                if(eachLine.isBlank()) return@forEach
+
+                val dateRegex = """date=([\d-]+)""".toRegex()
+                val date = dateRegex.find(eachLine)?.groupValues?.get(1)?.let { LocalDate.parse(it) }
+
+                val menuRegex = """menu=\[([^]]*)]""".toRegex()
+                val menus = menuRegex.find(eachLine)?.groupValues?.get(1)
+
+                val tableOrderMap: TableOrderMap = mutableMapOf()
+
+                menus!!.split(",").forEach { menu ->
+                    val menuSplit = menu.split("=")
+                    tableOrderMap[Menu(menuSplit[0], menuSplit[1].toInt())] = menuSplit[2].toInt()
+                }
+
+                paidTableMap[date!!] = tableOrderMap
+            }
+        }
+
+        return paidTableMap
     }
 }
