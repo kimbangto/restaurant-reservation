@@ -116,10 +116,10 @@ class TextParser: Parser {
         var string = ""
         tableMap.forEach { (date, tables) ->
             string += "date=${date},tables=["
-            tables.forEach { table ->
-                val reservation = table.value.reservation
+            tables.forEach { (date, table) ->
+                val reservation = table.reservation
                 val guest = reservation!!.guest
-                string += "{tableNumber=${table.value.tableNumber},numberOfSeats=${table.value.numberOfSeats},name=${guest.name},phoneNumber=${guest.phoneNumber},isVIP=${guest.isVIP},isBlackList=${guest.isBlackList},date=${reservation.date},numberOfPerson=${reservation.numberOfPerson},isVisit=${reservation.isVisit}},"
+                string += "{tableNumber=${table.tableNumber},numberOfSeats=${table.numberOfSeats},name=${guest.name},phoneNumber=${guest.phoneNumber},isVIP=${guest.isVIP},isBlackList=${guest.isBlackList},date=${reservation.date},numberOfPerson=${reservation.numberOfPerson},isVisit=${reservation.isVisit}},"
             }
             string.dropLast(1).plus("]").plus("\n")
         }
@@ -127,35 +127,34 @@ class TextParser: Parser {
     }
 
     override fun stringToTableMap(fileOutput: String?): TableMap {
-        TODO()
-//        val map: TableMap = mutableMapOf()
-//        if(fileOutput !== null) {
-//            fileOutput.split("\n").forEach { eachLine ->
-//                if(eachLine.isBlank()) return@forEach
-//
-//                val dateRegex = """date=([\d-]+)""".toRegex()
-//                val date = dateRegex.find(eachLine)?.groupValues?.get(1)?.let { LocalDate.parse(it) }
-//
-//                // tables 부분 추출
-//                val tableListRegex = """tables=\[([^]]*)]""".toRegex()
-//                val tables = tableListRegex.find(eachLine)?.groupValues?.get(1)
-//
-//                if (tables != null) {
-//                    // 각 테이블 정보를 추출
-//                    val tablePattern = """\{([^}]*)}""".toRegex()
-//                    val tableListString = tablePattern.findAll(tables).map { it.groupValues[1] }.toList()
-//
-//                    val tableListMap: MutableMap<Int, Table> = mutableListOf()
-//
-//                    tableListString.forEach { tableString ->
-//                        val tableInfoMap = objectStringToValueList(tableString)
-//                        tableList.add(Table(tableInfoMap[0].toInt(), tableInfoMap[1].toInt(), Reservation(Guest(tableInfoMap[2], tableInfoMap[3], tableInfoMap[4].toBooleanStrict(), tableInfoMap[5].toBooleanStrict()), date!!, tableInfoMap[7].toInt(), tableInfoMap[8].toBooleanStrict())))
-//                    }
-//
-//                    map[date!!] = tableList
-//                }
-//            }
-//        }
-//        return map
+        val map: TableMap = mutableMapOf()
+        if(fileOutput !== null) {
+            fileOutput.split("\n").forEach { eachLine ->
+                if(eachLine.isBlank()) return@forEach
+
+                val dateRegex = """date=([\d-]+)""".toRegex()
+                val date = dateRegex.find(eachLine)?.groupValues?.get(1)?.let { LocalDate.parse(it) }
+
+                // tables 부분 추출
+                val tableListRegex = """tables=\[([^]]*)]""".toRegex()
+                val tables = tableListRegex.find(eachLine)?.groupValues?.get(1)
+
+                if (tables != null) {
+                    // 각 테이블 정보를 추출
+                    val tablePattern = """\{([^}]*)}""".toRegex()
+                    val tableListString = tablePattern.findAll(tables).map { it.groupValues[1] }.toList()
+
+                    val tableListMap: MutableMap<Int, Table> = mutableMapOf()
+
+                    tableListString.forEach { tableString ->
+                        val tableInfoMap = objectStringToValueList(tableString)
+                        tableListMap[tableInfoMap[0].toInt()] = (Table(tableInfoMap[0].toInt(), tableInfoMap[1].toInt(), Reservation(Guest(tableInfoMap[2], tableInfoMap[3], tableInfoMap[4].toBooleanStrict(), tableInfoMap[5].toBooleanStrict()), date!!, tableInfoMap[7].toInt(), tableInfoMap[8].toBooleanStrict())))
+                    }
+
+                    map[date!!] = tableListMap
+                }
+            }
+        }
+        return map
     }
 }
