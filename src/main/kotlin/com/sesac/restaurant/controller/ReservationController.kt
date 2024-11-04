@@ -202,7 +202,12 @@ class ReservationController {
         val num = ConsoleInput.consoleLine()
         val date = weekList[num.toInt() - 1]
 
-        reservationService.updateReservation(updateNum.toInt(), date)
+        // 여기부터
+        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_UPDATE_3)
+        val numberOfPerson = ConsoleInput.consoleLine()
+
+        reservationService.updateReservation(updateNum.toInt(), date, numberOfPerson.toInt())
+        // 여기까지 채연이가 추가했어요~!
 
     }
 

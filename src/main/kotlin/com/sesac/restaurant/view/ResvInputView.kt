@@ -21,6 +21,7 @@ object ResvInputView {
 
     const val MESSAGE_RESV_UPDATE_1 = "변경할 예약 번호를 입력해주세요"
     const val MESSAGE_RESV_UPDATE_2 = "변경할 날짜를 선택해주세요"
+    const val MESSAGE_RESV_UPDATE_3 = "변경할 인원을 입력해주세요"
 
     const val MESSAGE_RESV_PRINT = "예약 번호 %d | 예약자 : %s | 예약자 연락처 : %s | 예약 인원 %d | 예약 날짜 : %s "
 
