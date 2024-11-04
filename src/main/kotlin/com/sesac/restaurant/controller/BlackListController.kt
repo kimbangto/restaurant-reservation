@@ -3,9 +3,8 @@ package com.sesac.restaurant.controller
 import com.sesac.restaurant.common.ConsoleInput
 import com.sesac.restaurant.service.BlackListService
 
-class BlackListController {
-    private val blackListService = BlackListService()
-    fun startBlackList() {
+class BlackListController(private val blackListService: BlackListService) {
+    suspend fun startBlackList() {
         showBlackList()
         println("1. 삭제 | 0. 메인")
 
@@ -20,11 +19,10 @@ class BlackListController {
             else -> {
                 // Exception 재귀
             }
-
         }
     }
     /** "블랙리스트를 블랙리스트서비스를 통해 가져오고 출력해주는 함수" */
-    private fun showBlackList() {
+    private suspend fun showBlackList() {
         val blackList = blackListService.getBlackList()
 
         if (blackList.isEmpty()) {
@@ -38,7 +36,9 @@ class BlackListController {
     }
 
     /** "블랙리스트서비스를 통해 삭제하는 함수"*/
-    private fun removeBlackList() {
+    private suspend fun removeBlackList() {
+        showBlackList()
+
         println("블랙리스트 삭제할 손님의 번호를 입력하세요.")
 
         val indexInput = ConsoleInput.consoleLine().toIntOrNull()
@@ -54,6 +54,7 @@ class BlackListController {
             println("블랙리스트에서 삭제되었습니다.")
         } else {
             println("잘못된 번호입니다. 다시 입력해주세요.")
+            removeBlackList()
         }
         startBlackList()
     }
