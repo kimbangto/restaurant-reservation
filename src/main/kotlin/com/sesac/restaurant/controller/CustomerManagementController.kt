@@ -1,14 +1,16 @@
 package com.sesac.restaurant.controller
 
 import com.sesac.restaurant.common.ConsoleInput
+import com.sesac.restaurant.repository.GuestRepository
+import com.sesac.restaurant.service.BlackListService
 import com.sesac.restaurant.service.VipListService
 
-class CustomerManagementController {
-    private val blackListController = BlackListController()
-    private val vipListService = VipListService()
+class CustomerManagementController(guestRepository: GuestRepository) {
+    private val blackListController = BlackListController(BlackListService(guestRepository))
+    private val vipListService = VipListService(guestRepository)
 
     // 이 타이밍에 비동기적으로 데이터를 불러와 놔야하는 것인가 블랙리스트, VIP
-    fun startCustomerManagement() {
+    suspend fun startCustomerManagement() {
         println("1. 블랙리스트 | 2. VIP 리스트")
         val input = ConsoleInput.consoleLine()
         when (input) {
@@ -28,7 +30,7 @@ class CustomerManagementController {
     }
 
     /** "VIP 리스트를 가져오고 보여주는 함수" */
-    private fun showVipList() {
+    private suspend fun showVipList() {
         val vipList = vipListService.getVipList()
 
         if (vipList.isEmpty()) {
