@@ -23,5 +23,7 @@ class ReservationRepository private constructor(override val fileIO: FileIO, ove
 
     suspend fun deleteReservation(reservationNumber: Int) = fileOverwrite({list -> list.remove(reservationNumber)}, {list -> fileIO.parser.reservationMapToString(list)})
 
-    suspend fun updateReservation(reservationNumber: Int, date: LocalDate) =  fileOverwrite({list -> list[reservationNumber]!!.date = date}, { list -> fileIO.parser.reservationMapToString(list)})
+    suspend fun updateReservation(reservationNumber: Int, date: LocalDate) =  fileOverwrite({list -> list[reservationNumber]!!.date = date}, { list -> fileIO.parser.reservationMapToString(list) })
+
+    suspend fun makeReservationAsNoShow(reservationNumber: Int) = fileOverwrite({list -> list[reservationNumber]!!.isVisit = false}, {list -> fileIO.parser.reservationMapToString(list)})
 }
