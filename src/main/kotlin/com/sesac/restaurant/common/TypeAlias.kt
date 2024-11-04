@@ -10,3 +10,4 @@ typealias TableOrderMap = MutableMap<Menu, Int> // 주문내용
 typealias ReservationMap = MutableMap<Int, Reservation>
 typealias TableMap = MutableMap<LocalDate, Map<Int, Table>> // 날짜별 테이블
 typealias BlackListMap = MutableMap<String, Guest>
+typealias PaidTableMap = MutableMap<LocalDate, TableOrderMap>

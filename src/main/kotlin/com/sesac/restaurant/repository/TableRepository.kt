@@ -2,7 +2,6 @@ package com.sesac.restaurant.repository
 
 import com.sesac.restaurant.common.TableMap
 import com.sesac.restaurant.data.FileIO
-import com.sesac.restaurant.model.Menu
 import com.sesac.restaurant.model.Reservation
 import com.sesac.restaurant.model.Table
 import java.time.LocalDate

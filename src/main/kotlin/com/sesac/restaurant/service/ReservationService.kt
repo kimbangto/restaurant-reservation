@@ -40,8 +40,8 @@ class ReservationService {
     }
 
     /** 예약 변경 */
-    suspend fun updateReservation(updateNum: Int, date: LocalDate) {
-        reservationRepository.updateReservation(updateNum, date)
+    suspend fun updateReservation(updateNum: Int, date: LocalDate, numberOfPerson: Int) {
+        reservationRepository.updateReservation(updateNum, date, numberOfPerson)
     }
 
     /** 노쇼 처리 */

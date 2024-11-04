@@ -1,0 +1,25 @@
+package com.sesac.restaurant.common
+
+const val RESET = "\u001B[0m"
+const val BOLD = "\u001B[1m"
+const val ITALIC = "\u001B[3m"
+const val UNDER_LINE = "\u001B[4m"
+const val STRIKE_THROUGH = "\u001B[9m"
+const val BLACK_TEXT = "\u001B[30m"
+const val RED_TEXT = "\u001B[31m"
+const val GREEN_TEXT = "\u001B[32m"
+const val YELLOW_TEXT = "\u001B[33m"
+const val BLUE_TEXT = "\u001B[34m"
+const val MAGENTA_TEXT = "\u001B[35m"
+const val WHITE_TEXT = "\u001B[37m"
+const val CYAN_TEXT = "\u001B[36m"
+const val GRAY_TEXT = "\u001B[90m"   // 회색
+const val PURPLE = "\u001B[38;2;153;153;255m" // 153 153 255
+const val BLACK_BACKGROUND = "\u001B[40m"
+const val RED_BACKGROUND = "\u001B[41m"
+const val GREEN_BACKGROUND = "\u001B[42m"
+const val YELLOW_BACKGROUND = "\u001B[43m"
+const val BLUE_BACKGROUND = "\u001B[44m"
+const val MAGENTA_BACKGROUND = "\u001B[45m"
+const val WHITE_BACKGROUND = "\u001B[46m"
+const val CYAN_BACKGROUND = "\u001B[47m"

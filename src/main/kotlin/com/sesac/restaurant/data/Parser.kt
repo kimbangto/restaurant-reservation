@@ -11,4 +11,6 @@ interface Parser {
     fun stringToMenuMap(fileOutput: String?): MenuMap
     fun tableMapToString(tableMap: TableMap): String
     fun stringToTableMap(fileOutput: String?): TableMap
+    fun paidTableMapToString(paidTableMap: PaidTableMap): String
+    fun stringToPaidTableMap(fileOutput: String?): PaidTableMap
 }
