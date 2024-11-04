@@ -1,3 +1,6 @@
 package com.sesac.restaurant.model
 
-data class PaidTable(val table: Table, val order: Order, val reservation: Reservation)
+import com.sesac.restaurant.common.TableOrderMap
+import java.time.LocalDate
+
+data class PaidTable(val date: LocalDate, val tableOrder: TableOrderMap)
