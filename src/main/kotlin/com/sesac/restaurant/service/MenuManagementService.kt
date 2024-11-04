@@ -1,52 +1,47 @@
 package com.sesac.restaurant.service
 
-class MenuManagementService {
-    private val menuList = mutableMapOf<String, Int>()
+import com.sesac.restaurant.repository.MenuRepository
 
-    init {
-        menuList["돈까스"] = 10000
-        menuList["비빔밥"] = 9000
-        menuList["김치찌개"] = 9000
-        menuList["된장찌개"] = 8000
-        menuList["순대국밥"] = 10000
+class MenuManagementService(private val menuRepository: MenuRepository) {
+
+    suspend fun getMenu(): List<Pair<String, Int>> {
+        return menuRepository.getMap().map { it.key to it.value.price }
     }
 
-    fun getMenu(): List<Pair<String, Int>> {
-        return menuList.toList()
-    }
+    suspend fun addMenu(name: String, price: Int): Boolean {
+        val menuMap = menuRepository.getMap()
 
-    fun addMenu(name: String, price: Int): Boolean {
-        if (menuList.containsKey(name)) {
+        if (menuMap.containsKey(name)) {
             return false
         } else {
-            menuList[name] = price
+            menuRepository.saveMenu(name, price)
 
             return true
         }
     }
 
-    fun updateMenu(index: Int, newName: String, newPrice: Int): Boolean {
-        val indexMenuList = getMenu()
+    suspend fun updateMenu(index: Int, newName: String, newPrice: Int): Boolean {
+        val menuList = getMenu()
 
-        if (index !in indexMenuList.indices) {
+        if (index !in menuList.indices) {
             return false
         } else {
-            val oldName = indexMenuList[index].first
-            menuList.remove(oldName)
-            menuList[newName] = newPrice
+            val oldName = menuList[index].first
+            menuRepository.deleteMenu(oldName)
+            menuRepository.saveMenu(newName, newPrice)
 
             return true
         }
     }
 
-    fun deleteMenu(index: Int): Boolean {
-        val indexMenuList = getMenu()
+    suspend fun deleteMenu(index: Int): Boolean {
+        val menuList = getMenu()
 
-        if (index !in indexMenuList.indices) {
+        if (index !in menuList.indices) {
             return false
         } else {
-            val oldName = indexMenuList[index].first
-            menuList.remove(oldName)
+            val oldName = menuList[index].first
+            menuRepository.deleteMenu(oldName)
 
             return true
         }

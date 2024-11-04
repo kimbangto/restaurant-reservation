@@ -89,7 +89,7 @@ class TextParser: Parser {
         var string = ""
         menuMap.entries.forEach {
             val menu = it.value
-            string += "name=${menu.name},price=${menu.price}" + "/n"
+            string += "name=${menu.name},price=${menu.price}" + "\n"
         }
 
         return string.trim()
