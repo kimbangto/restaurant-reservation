@@ -42,7 +42,7 @@ class SalesManagementService {
         val todaySales = paidTables.values
             .groupBy { it.reservation.date }
             .mapValues { (_, order) ->
-                order.sumOf { it.order.order.entries.sumOf { (menu, amount) -> menu.price * amount } }
+                order.sumOf { it.order.tableOrder.entries.sumOf { (menu, amount) -> menu.price * amount } }
             }
 
         return todaySales
@@ -62,7 +62,7 @@ class SalesManagementService {
 
                 orderWeek == currentWeek
             }
-            .sumOf { it.order.order.entries.sumOf { (menu, amount) -> menu.price * amount } }
+            .sumOf { it.order.tableOrder.entries.sumOf { (menu, amount) -> menu.price * amount } }
 
         return weeklySales
     }
@@ -70,7 +70,7 @@ class SalesManagementService {
     /**"결제된 테이블을 가져와서 메뉴별 매출 계산 함수"*/
     fun getMenuSales(): Map<Menu, Int> {
         val menuSales = paidTables.values
-            .flatMap { it. order.order.entries }
+            .flatMap { it. order.tableOrder.entries }
             .groupBy( { it.key }, { it.value * it.key.price } )
             .mapValues { (_, sales) -> sales.sum() }
 
