@@ -46,18 +46,29 @@ class ReservationController {
 //        val phoneNumber = ConsoleInput.consoleLine()
         val phoneNumber = getPhoneNumber()
 
-        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_3)
-        val numberOfPerson = ConsoleInput.consoleLine()
+        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_3_1)
+        var numberOfPerson = ConsoleInput.consoleLine().toInt()
+        // 8인 이하만 예약 가능하게
+        while (!(numberOfPerson in 1..8)) {
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_3_2)
+            numberOfPerson = ConsoleInput.consoleLine().toInt()
+        }
 
-        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_4)
+        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_4_1)
         val weekList = DateHandler.getWeekList()
         for (i: Int in 0..weekList.size - 1) {
             ResvOutputView.printLocalDate(i + 1, weekList[i])
         }
         ResvOutputView.printSpace()
 
-        val num = ConsoleInput.consoleLine()
-        val date = weekList[num.toInt() - 1]
+        var num = ConsoleInput.consoleLine().toInt()
+        // 선택지 외의 입력을 받으면 반복
+        while (!(num in 1..7)) {
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_4_2)
+            num = ConsoleInput.consoleLine().toInt()
+        }
+
+        val date = weekList[num - 1]
 
         val guest = guestService.saveGuest(name, phoneNumber)
 
@@ -72,7 +83,12 @@ class ReservationController {
             val reservationMap = reservationService.getReservation()
             guestService.updateVip(reservationMap, guest)
 
-            val reservation = reservationService.saveReservation(guest, date, numberOfPerson.toInt())
+            val reservation = reservationService.saveReservation(guest, date, numberOfPerson)
+
+            // 테이블 정보 저장
+            if (tableNumber != null) {
+                tableController.makeReservationTable(date, tableNumber, reservation)
+            }
 
             ResvOutputView.printMessageString(ResvOutputView.MESSAGE_RESV_MAKE_NAME, reservation.guest.name)
             ResvOutputView.printMessageString(ResvOutputView.MESSAGE_RESV_MAKE_TEL, reservation.guest.phoneNumber)
@@ -83,7 +99,7 @@ class ReservationController {
         }
     }
 
-    /** 연락처 포맷에 맞게 입력 받기 */
+    /** 연락처 포맷에 맞게 입력 받는 기능 (010 이후 8자리 숫자) */
     fun getPhoneNumber(): String {
         val phoneNumRegex = Regex("^010\\d{8}")
 
@@ -141,7 +157,7 @@ class ReservationController {
     /** 노쇼 처리 */
     suspend fun noShow() {
 
-        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_NOSHOW)
+        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_NOSHOW_1)
         // 노쇼 고객은 오늘 예약에서 선택
         val reservationMap = reservationService.getReservation().filter { it.value.date == LocalDate.now() }
 
@@ -149,10 +165,14 @@ class ReservationController {
             ResvOutputView.printMessageReservation(ResvOutputView.MESSAGE_RESV_PRINT, key, value)
         }
 
-        val noShowNum = ConsoleInput.consoleLine()
+        var noShowNum = ConsoleInput.consoleLine().toInt()
+        while (!reservationMap.keys.contains(noShowNum)) {
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_NO_RESERVATION)
+            noShowNum = ConsoleInput.consoleLine().toInt()
+        }
 
-        reservationService.updateIsVisit(noShowNum.toInt())
-        guestService.updateBlackList(reservationMap, noShowNum.toInt())
+        reservationService.updateIsVisit(noShowNum)
+        guestService.updateBlackList(reservationMap, noShowNum)
         ResvOutputView.printMessage(ResvOutputView.MESSAGE_RESV_ISBLACKLIST)
     }
 
@@ -172,9 +192,13 @@ class ReservationController {
         }
 
         // 입력 검사해야함
-        val deleteNum = ConsoleInput.consoleLine()
-        ResvOutputView.printMessageString(ResvOutputView.MESSAGE_RESV_DELETE_2, deleteNum)
-        reservationService.deleteReservation(deleteNum.toInt())
+        var deleteNum = ConsoleInput.consoleLine().toInt()
+        while (!reservationMap.keys.contains(deleteNum)) {
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_NO_RESERVATION)
+            deleteNum = ConsoleInput.consoleLine().toInt()
+        }
+        ResvOutputView.printMessageInt(ResvOutputView.MESSAGE_RESV_DELETE_2, deleteNum)
+        reservationService.deleteReservation(deleteNum)
 
     }
 
@@ -195,23 +219,40 @@ class ReservationController {
             ResvInputView.printMessageReservation(ResvInputView.MESSAGE_RESV_PRINT, key, value)
         }
 
-        val updateNum = ConsoleInput.consoleLine()
+        var updateNum = ConsoleInput.consoleLine().toInt()
+
+        while (!reservationMap.keys.contains(updateNum)) {
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_NO_RESERVATION)
+            updateNum = ConsoleInput.consoleLine().toInt()
+        }
 
         ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_UPDATE_2)
+
         val weekList = DateHandler.getWeekList()
         for (i: Int in 0..weekList.size - 1) {
             ResvOutputView.printLocalDate(i + 1, weekList[i])
         }
         ResvOutputView.printSpace()
 
-        val num = ConsoleInput.consoleLine()
-        val date = weekList[num.toInt() - 1]
+        var num = ConsoleInput.consoleLine().toInt()
+
+        while (!(num in 1..7)) {
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_4_2)
+            num = ConsoleInput.consoleLine().toInt()
+        }
+
+        val date = weekList[num - 1]
 
         // 여기부터
         ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_UPDATE_3)
-        val numberOfPerson = ConsoleInput.consoleLine()
+        var numberOfPerson = ConsoleInput.consoleLine().toInt()
 
-        reservationService.updateReservation(updateNum.toInt(), date, numberOfPerson.toInt())
+        while (!(numberOfPerson in 1..8)) {
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_3_2)
+            numberOfPerson = ConsoleInput.consoleLine().toInt()
+        }
+
+        reservationService.updateReservation(updateNum, date, numberOfPerson)
         // 여기까지 채연이가 추가했어요~!
 
     }

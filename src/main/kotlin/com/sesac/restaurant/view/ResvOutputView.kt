@@ -20,7 +20,7 @@ object ResvOutputView {
     const val MESSAGE_RESV_ISBLACKLIST = "블랙리스트로 지정되었습니다"
 
     const val MESSAGE_RESV_DELETE_1 = "예약 취소"
-    const val MESSAGE_RESV_DELETE_2 = "예약 번호 %s 이 취소됩니다"
+    const val MESSAGE_RESV_DELETE_2 = "예약 번호 %d 이 취소됩니다"
 
     const val MESSAGE_RESV_UPDATE_1 = "예약 변경"
 
