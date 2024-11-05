@@ -29,7 +29,7 @@ class TableManagementController() {
         if (availableTables.containsKey(input)) {
             return input
         } else {
-            println("테이블번호 ㄴㄴ")
+            println("이미 예약된 테이블입니다.")
             return null
         }
     }
@@ -47,6 +47,11 @@ class TableManagementController() {
     suspend fun showTablesByDate(date: LocalDate) {
         val tables = tableService.getTableStatusByDate(date)
         println("날짜: $date 테이블 상태")
+        print("$BLUE_BACKGROUND 2인석 $RESET ")
+        print("$YELLOW_BACKGROUND 4인석 $RESET ")
+        print("$GREEN_BACKGROUND 8인석 $RESET ")
+        println()
+        println("-------------------------------")
 
         for (row in layout) {
             for (tableNumber in row) {
