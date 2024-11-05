@@ -15,7 +15,7 @@ class TableManagementController() {
         arrayOf(7, 8, null, 6)
     )
 
-    suspend fun selectTable(date: LocalDate): Int? {
+    suspend fun selectTable(date: LocalDate, numberOfPerson: Int): Int? {
         val availableTables = tableService.getAvailableTables(date)
 
         if (availableTables.isEmpty()) {
@@ -25,6 +25,12 @@ class TableManagementController() {
 
         println("예약할 번호를 입력하세요.")
         val input = ConsoleInput.consoleLine().toInt()
+
+        // 예약 인원이 선택한 테이블의 좌석보다 많으면 예약 되지 않게
+        if (availableTables[input] != null && availableTables[input]?.numberOfSeats!! < numberOfPerson ) {
+            println("좌석보다 인원이 많습니다.")
+            return null
+        }
 
         if (availableTables.containsKey(input)) {
             return input
