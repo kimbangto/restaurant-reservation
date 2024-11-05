@@ -6,7 +6,8 @@ object ResvInputView {
 
     const val MESSAGE_RESV_START_1 = "1.예약하기 | 2.예약현황 | 3.예약취소 | 4.예약변경 | 0.예약 관리자 종료"
 
-    const val MESSAGE_RESV_MAKE_1 = "예약자 이름을 입력해주세요"
+    const val MESSAGE_RESV_MAKE_1_1 = "예약자 이름을 입력해주세요"
+    const val MESSAGE_RESV_MAKE_1_2 = "공백은 입력 할 수 없습니다"
     const val MESSAGE_RESV_MAKE_2_1 = "예약자 연락처를 입력해주세요 (예: 01012341234)"
     const val MESSAGE_RESV_MAKE_2_2 = "- 없이 형식에 맞게 입력해주세요 (예: 01012341234)"
     const val MESSAGE_RESV_MAKE_3_1 = "예약 인원을 입력해주세요"
