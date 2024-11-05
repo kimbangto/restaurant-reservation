@@ -13,6 +13,7 @@ import java.time.LocalDate
 class ReservationController {
 
     private val reservationService = ReservationService()
+    private val tableController = TableManagementController()
     private val guestService = GuestService()
 
     /** 예약 관리 시작 */
@@ -59,6 +60,10 @@ class ReservationController {
         val date = weekList[num.toInt() - 1]
 
         val guest = guestService.saveGuest(name, phoneNumber)
+
+        // Todo 테이블예약 마무리
+        tableController.showTablesByDate(date)
+        val tableNumber = tableController.selectTable(date)
 
         // 블랙리스트일 경우 예약 되지 않게
         if (!guest.isBlackList) {

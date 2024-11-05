@@ -3,7 +3,8 @@ package com.sesac.restaurant.controller
 import com.sesac.restaurant.common.ConsoleInput
 import com.sesac.restaurant.service.BlackListService
 
-class BlackListController(private val blackListService: BlackListService) {
+class BlackListController {
+    private val blackListService = BlackListService()
     suspend fun startBlackList() {
         showBlackList()
         println("1. 삭제 | 0. 메인")

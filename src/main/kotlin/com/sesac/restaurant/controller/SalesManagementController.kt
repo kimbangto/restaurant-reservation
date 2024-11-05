@@ -10,7 +10,7 @@ import java.util.*
 class SalesManagementController {
     private val salesService = SalesManagementService()
 
-    fun startSalesManagement() {
+    suspend fun startSalesManagement() {
         println("1. 결제기능 | 2. 일별매출 | 3. 주별매출 | 4. 메뉴별매출")
 
         val input = ConsoleInput.consoleLine()
@@ -32,7 +32,7 @@ class SalesManagementController {
     }
 
     /**"SalesService를 통해 가져온 일별 매출을 출력"*/
-    private fun showDailySales() {
+    private suspend fun showDailySales() {
         println("일별 매출")
         val dailySales = salesService.getDailySales()
         dailySales.forEach { (date, sales) ->
@@ -43,7 +43,7 @@ class SalesManagementController {
     }
 
     /**SalesService를 통해 가져온 주별 매출을 출력*/
-    private fun showWeeklySales() {
+    private suspend fun showWeeklySales() {
         println("금주매출")
         val today = LocalDate.now()
         val weekField = WeekFields.of(Locale.getDefault())
@@ -59,7 +59,7 @@ class SalesManagementController {
     }
 
     /**SalesService를 통해 가져온 메뉴별 매출을 출력*/
-    private fun showMenuSales() {
+    private suspend fun showMenuSales() {
         val menuSales = salesService.getMenuSales()
         println("메뉴별 매출")
         menuSales.forEach { (menu, sales) ->
