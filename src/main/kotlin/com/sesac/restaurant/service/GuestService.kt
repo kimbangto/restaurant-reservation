@@ -8,7 +8,7 @@ import com.sesac.restaurant.repository.GuestRepository
 class GuestService {
     val guestRepository = GuestRepository.getInstance(TextFileIO.getInstance())
 
-    /** guest 저장 */
+    /** guest 저장 : 이미 존재하는 guest일 경우(phoneNumber가 동일하면) 기존에 있던 guest 리턴 */
     suspend fun saveGuest(name: String, phoneNumber: String): Guest {
         var guest = Guest(name, phoneNumber)
 
