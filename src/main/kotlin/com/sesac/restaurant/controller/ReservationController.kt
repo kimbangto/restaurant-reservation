@@ -39,11 +39,13 @@ class ReservationController {
     suspend fun makeReservation() {
         ResvOutputView.printMessage(ResvOutputView.MESSAGE_RESV_MAKE_1)
 
-        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_1)
-        val name = ConsoleInput.consoleLine()
+        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_1_1)
+        var name = ConsoleInput.consoleLine()
+        while (name.isBlank()) {
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_1_1)
+            name = ConsoleInput.consoleLine()
+        }
 
-//        ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_2)
-//        val phoneNumber = ConsoleInput.consoleLine()
         val phoneNumber = getPhoneNumber()
 
         ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_3_1)
