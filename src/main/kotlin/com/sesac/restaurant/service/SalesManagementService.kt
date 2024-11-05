@@ -1,5 +1,6 @@
 package com.sesac.restaurant.service
 
+import com.sesac.restaurant.data.json.JsonFileIO
 import com.sesac.restaurant.data.txt.TextFileIO
 import com.sesac.restaurant.model.*
 import com.sesac.restaurant.repository.PaidTableRepository
@@ -8,7 +9,7 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 
 class SalesManagementService {
-    private val paidTableRepository = PaidTableRepository.getInstance(TextFileIO.getInstance())
+    private val paidTableRepository = PaidTableRepository.getInstance(JsonFileIO.getInstance())
 
     /**"결제된 테이블을 가져와서 일별 매출 계산 함수"*/
     suspend fun getDailySales(): Map<LocalDate, Int> {

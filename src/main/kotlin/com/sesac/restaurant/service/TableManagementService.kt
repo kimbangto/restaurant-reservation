@@ -1,5 +1,6 @@
 package com.sesac.restaurant.service
 
+import com.sesac.restaurant.data.json.JsonFileIO
 import com.sesac.restaurant.data.txt.TextFileIO
 import com.sesac.restaurant.model.Reservation
 import com.sesac.restaurant.model.Table
@@ -7,7 +8,7 @@ import com.sesac.restaurant.repository.TableRepository
 import java.time.LocalDate
 
 class TableManagementService() {
-    private val tableRepository = TableRepository.getInstance(TextFileIO.getInstance())
+    private val tableRepository = TableRepository.getInstance(JsonFileIO.getInstance())
 
     suspend fun getTableStatusByDate(date: LocalDate): Map<Int, Table> {
         return tableRepository.getTableListByDate(date)

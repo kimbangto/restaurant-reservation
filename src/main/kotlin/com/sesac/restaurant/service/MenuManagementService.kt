@@ -1,10 +1,11 @@
 package com.sesac.restaurant.service
 
+import com.sesac.restaurant.data.json.JsonFileIO
 import com.sesac.restaurant.data.txt.TextFileIO
 import com.sesac.restaurant.repository.MenuRepository
 
 class MenuManagementService {
-    private val menuRepository = MenuRepository.getInstance(TextFileIO.getInstance())
+    private val menuRepository = MenuRepository.getInstance(JsonFileIO.getInstance())
 
     suspend fun getMenu(): List<Pair<String, Int>> {
         return menuRepository.getMap().map { it.key to it.value.price }

@@ -33,6 +33,7 @@ class TableRepository private constructor(override val fileIO: FileIO, override 
     suspend fun getTableListByDate(date: LocalDate) = getMap()[date] ?: initTables
 
     suspend fun reservationTable(date: LocalDate, tableNumber: Int, reservationInfo: Reservation) = fileOverwrite({ list ->
+        println(date)
         if(list[date] == null) list[date] = initTables
         list[date]?.get(tableNumber)?.reservation = reservationInfo }, { list -> fileIO.parser.tableMapToString(list)})
 

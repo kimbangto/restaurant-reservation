@@ -1,5 +1,6 @@
 package com.sesac.restaurant.service
 
+import com.sesac.restaurant.data.json.JsonFileIO
 import com.sesac.restaurant.data.txt.TextFileIO
 import com.sesac.restaurant.model.Guest
 import com.sesac.restaurant.model.Reservation
@@ -10,7 +11,7 @@ class ReservationService {
 
     // controller에서 받은 요청을 처리한다
 
-    val reservationRepository = ReservationRepository.getInstance(TextFileIO.getInstance())
+    val reservationRepository = ReservationRepository.getInstance(JsonFileIO.getInstance())
 
     /** reservation 저장 */
     suspend fun saveReservation(guest: Guest, date: LocalDate, numberOfPeople: Int): Reservation {
