@@ -1,6 +1,7 @@
 package com.sesac.restaurant.repository
 
 import com.sesac.restaurant.common.TableMap
+import com.sesac.restaurant.common.TableOrderMap
 import com.sesac.restaurant.data.FileIO
 import com.sesac.restaurant.model.Reservation
 import com.sesac.restaurant.model.Table
@@ -33,9 +34,12 @@ class TableRepository private constructor(override val fileIO: FileIO, override 
     suspend fun getTableListByDate(date: LocalDate) = getMap()[date] ?: initTables
 
     suspend fun reservationTable(date: LocalDate, tableNumber: Int, reservationInfo: Reservation) = fileOverwrite({ list ->
-        println(date)
         if(list[date] == null) list[date] = initTables
         list[date]?.get(tableNumber)?.reservation = reservationInfo }, { list -> fileIO.parser.tableMapToString(list)})
+
+    suspend fun orderTable(date: LocalDate, tableNumber: Int, tableOrderMap: TableOrderMap) = fileOverwrite({ list ->
+        list[date]?.get(tableNumber)?.tableOrderMap = tableOrderMap}, { list -> fileIO.parser.tableMapToString(list)})
+
 
     suspend fun deleteTableReservation(date: LocalDate, tableNumber: Int) = fileOverwrite({ list -> list[date]?.get(tableNumber)?.reservation = null }, { list -> fileIO.parser.tableMapToString(list)})
 }
