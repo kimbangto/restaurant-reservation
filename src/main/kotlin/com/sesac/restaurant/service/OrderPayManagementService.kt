@@ -21,6 +21,7 @@ class OrderPayManagementService {
             if (menu != null) {
                 tableOrderMap[menu] = amount
             } else {
+                println("존재하지 않는 메뉴: $menuName")
                 return false
             }
         }
