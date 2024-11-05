@@ -42,7 +42,7 @@ class ReservationController {
         ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_1_1)
         var name = ConsoleInput.consoleLine()
         while (name.isBlank()) {
-            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_1_1)
+            ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_MAKE_1_2)
             name = ConsoleInput.consoleLine()
         }
 
@@ -74,12 +74,11 @@ class ReservationController {
 
         val guest = guestService.saveGuest(name, phoneNumber)
 
-        // Todo 테이블예약 마무리
         tableController.showTablesByDate(date)
-        val tableNumber = tableController.selectTable(date)
+        val tableNumber = tableController.selectTable(date, numberOfPerson)
 
         // 블랙리스트일 경우 예약 되지 않게
-        if (!guest.isBlackList) {
+        if (!guest.isBlackList && tableNumber != null) {
 
             // vip 처리
             val reservationMap = reservationService.getReservation()
@@ -88,15 +87,13 @@ class ReservationController {
             val reservation = reservationService.saveReservation(guest, date, numberOfPerson)
 
             // 테이블 정보 저장
-            if (tableNumber != null) {
-                tableController.makeReservationTable(date, tableNumber, reservation)
-            }
+            tableController.makeReservationTable(date, tableNumber, reservation)
 
             ResvOutputView.printMessageString(ResvOutputView.MESSAGE_RESV_MAKE_NAME, reservation.guest.name)
             ResvOutputView.printMessageString(ResvOutputView.MESSAGE_RESV_MAKE_TEL, reservation.guest.phoneNumber)
             ResvOutputView.printMessageInt(ResvOutputView.MESSAGE_RESV_MAKE_NUMBEROFPERSON, reservation.numberOfPerson)
             ResvOutputView.printMessageString(ResvOutputView.MESSAGE_RESV_MAKE_DATE, reservation.date.toString())
-        } else {
+        } else if (guest.isBlackList) {
             ResvOutputView.printMessage(ResvOutputView.MESSAGE_RESV_MAKE_BLACKLIST)
         }
     }
@@ -160,7 +157,7 @@ class ReservationController {
     suspend fun noShow() {
 
         ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_NOSHOW_1)
-        // 노쇼 고객은 오늘 예약에서 선택
+        // 노쇼 고객은 오늘 예약 중 선택
         val reservationMap = reservationService.getReservation().filter { it.value.date == LocalDate.now() }
 
         for ((key, value) in reservationMap) {
@@ -193,7 +190,6 @@ class ReservationController {
             ResvInputView.printMessageReservation(ResvInputView.MESSAGE_RESV_PRINT, key, value)
         }
 
-        // 입력 검사해야함
         var deleteNum = ConsoleInput.consoleLine().toInt()
         while (!reservationMap.keys.contains(deleteNum)) {
             ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_NO_RESERVATION)
@@ -204,10 +200,8 @@ class ReservationController {
 
     }
 
-    /** 예약 변경 */
+    /** 예약 변경 : 날짜 순으로 정렬된 예약 리스트 보여주고 변경할 예약 선택 후 예약 정보(날짜, 인원 수) 변경 */
     suspend fun updateReservation() {
-        // 날짜 순으로 정렬된 예약 리스트 보여주고 변경할 예약 선택 후 예약 정보 변경
-        // 변경 가능한 예약 정보는 날짜만?
 
         ResvOutputView.printMessage(ResvOutputView.MESSAGE_RESV_UPDATE_1)
 
@@ -245,7 +239,6 @@ class ReservationController {
 
         val date = weekList[num - 1]
 
-        // 여기부터
         ResvInputView.printMessage(ResvInputView.MESSAGE_RESV_UPDATE_3)
         var numberOfPerson = ConsoleInput.consoleLine().toInt()
 
@@ -255,7 +248,6 @@ class ReservationController {
         }
 
         reservationService.updateReservation(updateNum, date, numberOfPerson)
-        // 여기까지 채연이가 추가했어요~!
 
     }
 

@@ -15,7 +15,7 @@ class TableManagementController() {
         arrayOf(7, 8, null, 6)
     )
 
-    suspend fun selectTable(date: LocalDate): Int? {
+    suspend fun selectTable(date: LocalDate, numberOfPerson: Int): Int? {
         val availableTables = tableService.getAvailableTables(date)
 
         if (availableTables.isEmpty()) {
@@ -26,10 +26,16 @@ class TableManagementController() {
         println("예약할 번호를 입력하세요.")
         val input = ConsoleInput.consoleLine().toInt()
 
+        // 예약 인원이 선택한 테이블의 좌석보다 많으면 예약 되지 않게
+        if (availableTables[input] != null && availableTables[input]?.numberOfSeats!! < numberOfPerson ) {
+            println("좌석보다 인원이 많습니다.")
+            return null
+        }
+
         if (availableTables.containsKey(input)) {
             return input
         } else {
-            println("테이블번호 ㄴㄴ")
+            println("이미 예약된 테이블입니다.")
             return null
         }
     }
@@ -47,6 +53,11 @@ class TableManagementController() {
     suspend fun showTablesByDate(date: LocalDate) {
         val tables = tableService.getTableStatusByDate(date)
         println("날짜: $date 테이블 상태")
+        print("$BLUE_BACKGROUND 2인석 $RESET ")
+        print("$YELLOW_BACKGROUND 4인석 $RESET ")
+        print("$GREEN_BACKGROUND 8인석 $RESET ")
+        println()
+        println("-------------------------------")
 
         for (row in layout) {
             for (tableNumber in row) {
