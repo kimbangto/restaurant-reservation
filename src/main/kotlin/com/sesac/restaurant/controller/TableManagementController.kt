@@ -56,7 +56,7 @@ class TableManagementController() {
                     val table = tables[tableNumber]
                     if (table?.reservation != null) {
                         // 예약된 테이블은 검정색으로 표시
-                        print("$BLACK_BACKGROUND$WHITE_TEXT$tableNumber $RESET ")
+                        print("$BLACK_BACKGROUND$WHITE_TEXT $tableNumber $RESET ")
                     } else {
                         when (table?.numberOfSeats) {
                             2 -> print("$BLUE_BACKGROUND $tableNumber $RESET ")

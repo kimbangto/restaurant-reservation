@@ -1,12 +1,13 @@
 package com.sesac.restaurant.service
 
+import com.sesac.restaurant.data.json.JsonFileIO
 import com.sesac.restaurant.data.txt.TextFileIO
 import com.sesac.restaurant.model.Guest
 import com.sesac.restaurant.model.Reservation
 import com.sesac.restaurant.repository.GuestRepository
 
 class GuestService {
-    val guestRepository = GuestRepository.getInstance(TextFileIO.getInstance())
+    val guestRepository = GuestRepository.getInstance(JsonFileIO.getInstance())
 
     /** guest 저장 : 이미 존재하는 guest일 경우(phoneNumber가 동일하면) 기존에 있던 guest 리턴 */
     suspend fun saveGuest(name: String, phoneNumber: String): Guest {

@@ -110,10 +110,10 @@ class TextParser: Parser {
         var string = ""
         tableMap.forEach { (date, tables) ->
             string += "date=${date},tables=["
-            tables.forEach { (date, table) ->
+            tables.forEach { (tableNum, table) ->
                 val reservation = table.reservation
                 val guest = reservation?.guest
-                string += "{tableNumber=${table.tableNumber},numberOfSeats=${table.numberOfSeats},name=${guest?.name?:null},phoneNumber=${guest?.phoneNumber?:null},isVIP=${guest?.isVIP?:null},isBlackList=${guest?.isBlackList?:null},date=${reservation?.date?:null},numberOfPerson=${reservation?.numberOfPerson?:null},isVisit=${reservation?.isVisit?:null}},"
+                string += "{tableNumber=${tableNum},numberOfSeats=${table.numberOfSeats},name=${guest?.name?:null},phoneNumber=${guest?.phoneNumber?:null},isVIP=${guest?.isVIP?:null},isBlackList=${guest?.isBlackList?:null},date=${reservation?.date?:null},numberOfPerson=${reservation?.numberOfPerson?:null},isVisit=${reservation?.isVisit?:null}},"
             }
             string.dropLast(1).plus("]").plus("\n")
         }
@@ -142,7 +142,7 @@ class TextParser: Parser {
                         val tableInfoMap = objectStringToValueList(tableString)
                         if(tableInfoMap[2] == "null") {
                             tableListMap[tableInfoMap[0].toInt()] = (Table(tableInfoMap[0].toInt(), tableInfoMap[1].toInt(), null))
-                        }else {
+                        } else {
                             tableListMap[tableInfoMap[0].toInt()] = (Table(tableInfoMap[0].toInt(), tableInfoMap[1].toInt(), Reservation(Guest(tableInfoMap[2], tableInfoMap[3], tableInfoMap[4].toBooleanStrict(), tableInfoMap[5].toBooleanStrict()), date!!, tableInfoMap[7].toInt(), tableInfoMap[8].toBooleanStrict())))
                         }
                     }

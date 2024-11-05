@@ -3,8 +3,6 @@ package com.sesac.restaurant.repository
 import com.sesac.restaurant.common.PaidTableMap
 import com.sesac.restaurant.common.TableOrderMap
 import com.sesac.restaurant.data.FileIO
-import com.sesac.restaurant.model.PaidTable
-import com.sesac.restaurant.model.Reservation
 import java.time.LocalDate
 
 class PaidTableRepository private constructor(override val fileIO: FileIO, override val className: String = "PaidTable") : FileRepository<LocalDate, TableOrderMap> {
