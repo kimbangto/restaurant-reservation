@@ -1,3 +1,6 @@
-package com.sesac.restaurant.model
+package model
 
-data class Menu(val name: String, val price: Int) {}
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
+data class Menu(val name: String, var price: Int)

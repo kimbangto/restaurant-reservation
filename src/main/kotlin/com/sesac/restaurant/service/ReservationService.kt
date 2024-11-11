@@ -1,54 +1,42 @@
-package com.sesac.restaurant.service
+package service
 
-import com.sesac.restaurant.data.json.JsonFileIO
-import com.sesac.restaurant.data.txt.TextFileIO
-import com.sesac.restaurant.model.Guest
-import com.sesac.restaurant.model.Reservation
-import com.sesac.restaurant.repository.ReservationRepository
+import model.Guest
+import model.Reservation
+import repository.ReservationRepository
 import java.time.LocalDate
 
-class ReservationService {
+class ReservationService(private val repository: ReservationRepository = ReservationRepository()) {
 
-    // controller에서 받은 요청을 처리한다
+    /** 오늘부터의 예약 모두 반환 */
+    private fun getReservation() = repository.getReservationMap().filter { LocalDate.now() <= it.value.visitDate }
 
-    val reservationRepository = ReservationRepository.getInstance(JsonFileIO.getInstance())
+    /** 예약번호로 예약 반환 */
+    fun findByReservationNumber(reservationNumber: Int) = repository.findReservationByReservationNumber(reservationNumber)
 
-    /** reservation 저장 */
-    suspend fun saveReservation(guest: Guest, date: LocalDate, numberOfPeople: Int): Reservation {
-        val reservation = Reservation(guest, date, numberOfPeople)
+    /** 받은 전화번호로 되어있는 예약만 반환 */
+    fun getMyReservation(phoneNumber: String) = getReservation().filter { it.value.guest.phoneNumber == phoneNumber }
 
-        val reservationMap = reservationRepository.getMap()
+    /** 오늘자 예약 반환 */
+    fun getDayReservation() = repository.getReservationMap().filter { it.value.visitDate == LocalDate.now() }
 
-        val key = if (reservationMap.isEmpty()) {
-            1
-        } else {
-            reservationMap.keys.max() + 1
-        }
+    /** 오늘로부터 일주일치 예약 반환 */
+    fun getWeekReservation() = repository.getReservationMap().filter {  LocalDate.now() <= it.value.visitDate && it.value.visitDate <= LocalDate.now().plusDays(6) }
 
-        reservationRepository.saveReservation(key, reservation)
-
-        return reservation
+    /** 예약번호 중 가장 큰 숫자 + 1 반환 */
+    fun createNewReservationNumber(): Int {
+        val map = repository.getReservationMap()
+        return if(map.keys.isEmpty()) 1
+        else map.keys.max() + 1
     }
 
-    /** reservationMap 리턴 */
-    suspend fun getReservation(): MutableMap<Int, Reservation> {
-        return reservationRepository.getMap()
+    /** 예약 저장 */
+    fun makeReservation(reservation: Reservation) {
+        repository.saveReservation(reservation)
     }
 
     /** 예약 삭제 */
-    suspend fun deleteReservation(deleteNum: Int) {
-        reservationRepository.deleteReservation(deleteNum)
-    }
+    fun deleteByReservationNumber(reservationNumber: Int) = repository.deleteByReservationNumber(reservationNumber)
 
     /** 예약 변경 */
-    suspend fun updateReservation(updateNum: Int, date: LocalDate, numberOfPerson: Int) {
-        reservationRepository.updateReservation(updateNum, date, numberOfPerson)
-    }
-
-    /** 노쇼 처리 */
-    suspend fun updateIsVisit(noShowNum: Int) {
-        reservationRepository.makeReservationAsNoShow(noShowNum)
-    }
-
-
+    fun updateByReservationNumber(reservationNumber: Int, date: LocalDate, numberOfPeople: Int) = repository.updateByReservationNumber(reservationNumber, date, numberOfPeople)
 }

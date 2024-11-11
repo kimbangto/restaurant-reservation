@@ -1,4 +1,4 @@
-package com.sesac.restaurant.common
+package common
 
 const val RESET = "\u001B[0m"
 const val BOLD = "\u001B[1m"

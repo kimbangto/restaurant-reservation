@@ -1,42 +1,15 @@
-package com.sesac.restaurant.service
+package service
 
-import com.sesac.restaurant.data.json.JsonFileIO
-import com.sesac.restaurant.data.txt.TextFileIO
-import com.sesac.restaurant.model.Guest
-import com.sesac.restaurant.model.Reservation
-import com.sesac.restaurant.repository.GuestRepository
+import model.Guest
+import repository.GuestRepository
 
-class GuestService {
-    val guestRepository = GuestRepository.getInstance(JsonFileIO.getInstance())
+class GuestService(private val repository: GuestRepository = GuestRepository()) {
 
-    /** guest 저장 : 이미 존재하는 guest일 경우(phoneNumber가 동일하면) 기존에 있던 guest 리턴 */
-    suspend fun saveGuest(name: String, phoneNumber: String): Guest {
-        var guest = Guest(name, phoneNumber)
+    fun saveGuest(guest: Guest) = repository.saveGuest(guest)
 
-        if (guestRepository.findByPhoneNumber(phoneNumber) == null) {
-            guestRepository.saveGuest(guest)
-        } else {
-            guest = guestRepository.findByPhoneNumber(phoneNumber)!!
-        }
+    fun findByPhoneNumber(phoneNumber: String) = repository.findGuestByPhoneNumber(phoneNumber)
 
-        return guest
-    }
+    fun isPhoneNumberBlacklisted(phoneNumber: String): Boolean? = repository.findGuestByPhoneNumber(phoneNumber)?.isBlackList
 
-    /** vip로 변경 */
-    suspend fun updateVip(reservationMap: MutableMap<Int, Reservation>, guest: Guest) {
-        if (reservationMap.filter { it.value.guest == guest && it.value.isVisit }.count() >= 1) {
-            guest.isVIP = true
-            guestRepository.makeVIPByPhoneNumber(guest.phoneNumber)
-        }
-    }
-
-    /** blackList로 변경 */
-    suspend fun updateBlackList(reservationMap: Map<Int, Reservation>, noShowNum: Int) {
-        for (reservation in reservationMap) {
-            if (reservation.key == noShowNum) {
-                guestRepository.makeBlackListByPhoneNumber(reservation.value.guest.phoneNumber)
-                break
-            }
-        }
-    }
+    fun isPhoneNumberVIP(phoneNumber: String): Boolean? = repository.findGuestByPhoneNumber(phoneNumber)?.isVIP
 }

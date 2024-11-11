@@ -1,8 +1,0 @@
-name=백반,price=8000
-name=김치찌개,price=9000
-name=된장찌개,price=9000
-name=비빔밥,price=10000
-name=칼국수,price=10000
-name=오삼불고기,price=12000
-name=제육볶음,price=12000
-name=삼계탕,price=14000

@@ -1,29 +1,41 @@
-package com.sesac.restaurant.repository
+package repository
 
-import com.sesac.restaurant.common.ReservationMap
-import com.sesac.restaurant.data.FileIO
-import com.sesac.restaurant.model.Reservation
+import com.squareup.moshi.Types
+import model.Reservation
+import java.io.File
 import java.time.LocalDate
 
-class ReservationRepository private constructor(override val fileIO: FileIO, override val className: String = "Reservation") : FileRepository<Int, Reservation> {
+class ReservationRepository {
+    private val types = Types.newParameterizedType(Map::class.java, Integer::class.java, Reservation::class.java)
+    private val adapter = Moshi.moshi.adapter<MutableMap<Int, Reservation>>(types).indent("  ")
+    private val file = File(Moshi.dataPath("reservation"))
 
-    companion object {
-        private var instance: ReservationRepository? = null
+    fun getReservationMap() = adapter.fromJson(file.readText()) ?: mutableMapOf<Int, Reservation>()
 
-        fun getInstance(fileIO: FileIO): ReservationRepository {
-            return instance ?: synchronized(this) {
-                instance ?: ReservationRepository(fileIO).also { instance = it }
-            }
-        }
+    private fun overwriteReservationMap(reservationMap: MutableMap<Int, Reservation>) = file.writeText(adapter.toJson(reservationMap))
+
+    /** 예약번호로 예약 반환 */
+    fun findReservationByReservationNumber(reservationNumber: Int) = getReservationMap()[reservationNumber]
+
+    /** 예약 저장 */
+    fun saveReservation(reservation: Reservation) {
+        val map = getReservationMap()
+        map[reservation.reservationNumber] = reservation
+        overwriteReservationMap(map)
     }
 
-    override suspend fun getMap(): ReservationMap = fileIO.parser.stringToReservationMap((fileIO.readFile(className)))
+    /** 예약 취소 */
+    fun deleteByReservationNumber(reservationNumber: Int) {
+        val map = getReservationMap()
+        map.remove(reservationNumber)
+        overwriteReservationMap(map)
+    }
 
-    suspend fun saveReservation(reservationNumber: Int, reservation: Reservation) = fileOverwrite({list -> list[reservationNumber] = reservation}, { list -> fileIO.parser.reservationMapToString(list)})
-
-    suspend fun deleteReservation(reservationNumber: Int) = fileOverwrite({list -> list.remove(reservationNumber)}, {list -> fileIO.parser.reservationMapToString(list)})
-
-    suspend fun updateReservation(reservationNumber: Int, date: LocalDate, numberOfPerson: Int) =  fileOverwrite({list -> list[reservationNumber]!!.date = date; list[reservationNumber]!!.numberOfPerson = numberOfPerson}, { list -> fileIO.parser.reservationMapToString(list) })
-
-    suspend fun makeReservationAsNoShow(reservationNumber: Int) = fileOverwrite({list -> list[reservationNumber]!!.isVisit = false}, {list -> fileIO.parser.reservationMapToString(list)})
+    /** 예약 변경 */
+    fun updateByReservationNumber(reservationNumber: Int, date: LocalDate, numberOfPeople: Int) {
+        val map = getReservationMap()
+        map[reservationNumber]?.visitDate = date
+        map[reservationNumber]?.numberOfPeople = numberOfPeople
+        overwriteReservationMap(map)
+    }
 }

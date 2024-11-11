@@ -1,5 +1,7 @@
-package com.sesac.restaurant.model
+package model
 
+import com.squareup.moshi.JsonClass
 import java.time.LocalDate
 
-data class Reservation(val guest: Guest, var date: LocalDate, var numberOfPerson: Int, var isVisit: Boolean = true)
+@JsonClass(generateAdapter = true)
+data class Reservation(val reservationNumber: Int, val guest: Guest, var visitDate: LocalDate, var numberOfPeople: Int)
