@@ -1,34 +1,33 @@
-package com.sesac.restaurant.repository
+package repository
 
-import com.sesac.restaurant.common.GuestMap
-import com.sesac.restaurant.data.FileIO
-import com.sesac.restaurant.model.Guest
+import com.squareup.moshi.Types
+import model.Guest
+import java.io.File
 
-class GuestRepository private constructor(override val fileIO: FileIO, override val className: String = "Guest") : FileRepository<String, Guest> {
+class GuestRepository {
+    private val types = Types.newParameterizedType(Map::class.java, String::class.java, Guest::class.java)
+    private val adapter = Moshi.moshi.adapter<MutableMap<String, Guest>>(types).indent("  ")
+    private val file = File(Moshi.dataPath("guest"))
 
-    companion object {
-        private var instance: GuestRepository? = null
+    fun getGuestMap() = adapter.fromJson(file.readText()) ?: mutableMapOf<String, Guest>()
+    private fun overwriteGuestMap(guestMap: MutableMap<String, Guest>) = file.writeText(adapter.toJson(guestMap))
 
-        fun getInstance(fileIO: FileIO): GuestRepository {
-            return instance ?: synchronized(this) {
-                instance ?: GuestRepository(fileIO).also { instance = it }
-            }
-        }
+    /** 핸드폰 번호로 예약자 찾기 */
+    fun findGuestByPhoneNumber(phoneNumber: String) = getGuestMap()[phoneNumber]
+
+    /** 예약자 정보 저장 */
+    fun saveGuest(guest: Guest) {
+        val map = getGuestMap()
+        map[guest.phoneNumber] = guest
+        overwriteGuestMap(map)
     }
 
-    override suspend fun getMap(): GuestMap = fileIO.parser.stringToGuestMap((fileIO.readFile(className)))
-    
-    suspend fun saveGuest(guest: Guest) =  fileOverwrite({list -> list[guest.phoneNumber] = guest}, { list -> fileIO.parser.guestMapToString(list) })
+    /** 블랙리스트에서 제거 */
+    fun removeBlackList(phoneNumber: String) {
+        val map = getGuestMap()
+        val guest = map[phoneNumber]
 
-    suspend fun findByPhoneNumber(phoneNumber: String) = getMap()[phoneNumber]
-
-    suspend fun makeVIPByPhoneNumber(phoneNumber: String) = fileOverwrite({ list -> list[phoneNumber]?.isVIP = true}, { list -> fileIO.parser.guestMapToString(list)})
-
-    suspend fun makeBlackListByPhoneNumber(phoneNumber: String) = fileOverwrite({ list -> list[phoneNumber]?.isBlackList = true}, { list -> fileIO.parser.guestMapToString(list) })
-
-    suspend fun deleteBlackListByPhoneNumber(phoneNumber: String) = fileOverwrite({ list -> list[phoneNumber]?.isBlackList = false}, {list -> fileIO.parser.guestMapToString(list)})
-
-    suspend fun getBlackListMap() = getMap().filter { it.value.isBlackList }
-
-    suspend fun getVIPListMap() = getMap().filter { it.value.isVIP }
+        guest?.isBlackList = false
+        overwriteGuestMap(map)
+    }
 }

@@ -1,24 +1,45 @@
-package com.sesac.restaurant.repository
+package repository
 
-import com.sesac.restaurant.common.PaidTableMap
-import com.sesac.restaurant.common.TableOrderMap
-import com.sesac.restaurant.data.FileIO
+import com.squareup.moshi.Types
+import model.PaidTable
+import java.io.File
 import java.time.LocalDate
 
-class PaidTableRepository private constructor(override val fileIO: FileIO, override val className: String = "PaidTable") : FileRepository<LocalDate, TableOrderMap> {
+class PaidTableRepository {
+    private val types = Types.newParameterizedType(MutableMap::class.java, LocalDate::class.java, MutableList::class.java, PaidTable::class.java)
+    private val adapter = Moshi.moshi.adapter<MutableMap<LocalDate, MutableList<PaidTable>>>(types).indent("  ")
+    private val file = File(Moshi.dataPath("paid"))
 
-    companion object {
-        private var instance: PaidTableRepository? = null
+    fun getPaidTableMap() = adapter.fromJson(file.readText()) ?: mutableMapOf<LocalDate, MutableList<PaidTable>>()
 
-        fun getInstance(fileIO: FileIO): PaidTableRepository {
-            return instance ?: synchronized(this) {
-                instance ?: PaidTableRepository(fileIO).also { instance = it }
-            }
-        }
+    private fun overwritePaidTableMap(paidTableMap: MutableMap<LocalDate, MutableList<PaidTable>>) {
+        file.writeText(adapter.toJson(paidTableMap))
     }
 
-    override suspend fun getMap(): PaidTableMap = fileIO.parser.stringToPaidTableMap(fileIO.readFile(className))
+    /** 해당 날짜의 결제된 테이블 목록 반환 */
+    fun getPaidTableMapByDate(date: LocalDate): List<PaidTable> {
+        return getPaidTableMap()[date] ?: emptyList()
+    }
 
-    suspend fun savePaidTable(date: LocalDate, tableOrderMap: TableOrderMap) = fileOverwrite({ list ->
-        list[date] = tableOrderMap }, { list -> fileIO.parser.paidTableMapToString(list)} )
+    /** 특정 날짜에 결제 내역 추가 */
+    fun setPaidTableForDate(date: LocalDate, newTableOrder: Map<String, Int>) {
+        val map = getPaidTableMap()
+        val paidTableList = map.getOrPut(date) { mutableListOf() }
+
+        if (paidTableList.isNotEmpty()) {
+            val existingPaidTable = paidTableList[0]
+            val mergedTableOrder = existingPaidTable.tableOrder.toMutableMap()
+
+            newTableOrder.forEach { (menuName, amount) ->
+                mergedTableOrder[menuName] = mergedTableOrder.getOrDefault(menuName, 0) + amount
+            }
+
+            paidTableList[0] = PaidTable(date, mergedTableOrder)
+        } else {
+            val paidTable = PaidTable(date, newTableOrder)
+            paidTableList.add(paidTable)
+        }
+
+        overwritePaidTableMap(map)
+    }
 }

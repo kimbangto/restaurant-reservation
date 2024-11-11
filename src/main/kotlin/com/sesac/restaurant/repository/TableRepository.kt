@@ -1,45 +1,46 @@
-package com.sesac.restaurant.repository
+package repository
 
-import com.sesac.restaurant.common.TableMap
-import com.sesac.restaurant.common.TableOrderMap
-import com.sesac.restaurant.data.FileIO
-import com.sesac.restaurant.model.Reservation
-import com.sesac.restaurant.model.Table
+import com.squareup.moshi.Types
+import model.Reservation
+import model.Table
+import java.io.File
 import java.time.LocalDate
 
-class TableRepository private constructor(override val fileIO: FileIO, override val className: String = "Table") : FileRepository<LocalDate, Map<Int, Table>> {
+class TableRepository {
+    private val types = Types.newParameterizedType(MutableMap::class.java, LocalDate::class.java, Types.newParameterizedType(MutableMap::class.java, Integer::class.java, Table::class.java))
+    private val adapter = Moshi.moshi.adapter<MutableMap<LocalDate, MutableMap<Int, Table>>>(types).indent("  ")
+    private val file = File(Moshi.dataPath("table"))
 
-    // key: tableNumber, value: numberOfSeats
-    private val initTables = mapOf(
-        // 2인석
-        1 to Table(1, 2), 2 to Table(2, 2), 3 to Table(3, 2),
-        // 4인석
-        4 to Table(4, 4), 5 to Table(5, 4), 6 to Table(6, 4),
-        // 8인석
-        7 to Table(7, 8), 8 to Table(8, 8)
-    )
+    private fun getTableMap() = adapter.fromJson(file.readText()) ?: mutableMapOf<LocalDate, MutableMap<Int, Table>>()
+    private fun overwriteTableMap(tableMap: MutableMap<LocalDate, MutableMap<Int, Table>>) = file.writeText(adapter.toJson(tableMap))
 
-    companion object {
-        private var instance: TableRepository? = null
+    /** 해당 날짜에 예약된 테이블 목록 반환 */
+    fun getTableMapByDate(date: LocalDate) = getTableMap()[date] ?: mutableMapOf<Int, Table>()
 
-        fun getInstance(fileIO: FileIO): TableRepository {
-            return instance ?: synchronized(this) {
-                instance ?: TableRepository(fileIO).also { instance = it }
-            }
-        }
+    /** 해당 날짜에 해당 테이블이 예약되어있다면 반환*/
+    fun findByDateAndTableNumber(date: LocalDate, tableNumber: Int) = getTableMapByDate(date)[tableNumber] ?: Table(tableNumber, date, null)
+
+    /** 테이블에 예약 배정하기 */
+    fun setReservationAtTable(reservation: Reservation, tableNumber: Int, tableOrder: MutableMap<String, Int>?) {
+        val map = getTableMap()
+        val innerMap = map.getOrPut(reservation.visitDate) { mutableMapOf() }
+        innerMap[tableNumber] = Table(tableNumber, reservation.visitDate, reservation, tableOrder)
+        overwriteTableMap(map)
+    }
+    /** 특정 날짜와 테이블 번호로 테이블 삭제하기 */
+    fun deleteTableByDateAndTableNumber(date: LocalDate, tableNumber: Int) {
+        val map = getTableMap()
+        val innerMap = map[date]
+
+        innerMap?.remove(tableNumber)
+        overwriteTableMap(map)
     }
 
-    override suspend fun getMap(): TableMap = fileIO.parser.stringToTableMap(fileIO.readFile(className))
-
-    suspend fun getTableListByDate(date: LocalDate) = getMap()[date] ?: initTables
-
-    suspend fun reservationTable(date: LocalDate, tableNumber: Int, reservationInfo: Reservation) = fileOverwrite({ list ->
-        if(list[date] == null) list[date] = initTables
-        list[date]?.get(tableNumber)?.reservation = reservationInfo }, { list -> fileIO.parser.tableMapToString(list)})
-
-    suspend fun orderTable(date: LocalDate, tableNumber: Int, tableOrderMap: TableOrderMap) = fileOverwrite({ list ->
-        list[date]?.get(tableNumber)?.tableOrderMap = tableOrderMap}, { list -> fileIO.parser.tableMapToString(list)})
-
-
-    suspend fun deleteTableReservation(date: LocalDate, tableNumber: Int) = fileOverwrite({ list -> list[date]?.get(tableNumber)?.reservation = null }, { list -> fileIO.parser.tableMapToString(list)})
+    /** 테이블에 예약 삭제하기 */
+    fun deleteReservationFromTable(reservation: Reservation) {
+        val map = getTableMap()
+        val tableNumber = map[reservation.visitDate]?.values?.find { it.reservation?.reservationNumber == reservation.reservationNumber }?.tableNumber
+        map[reservation.visitDate]?.remove(tableNumber)
+        overwriteTableMap(map)
+    }
 }

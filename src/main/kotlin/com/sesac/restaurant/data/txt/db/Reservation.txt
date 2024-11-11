@@ -1,3 +1,0 @@
-reservationNumber=1,name=1,phoneNumber=1234,isVIP=false,isBlackList=false,date=2024-11-05,numberOfPerson=2,isVisit=true
-reservationNumber=2,name=qqq,phoneNumber=01012341234,isVIP=false,isBlackList=false,date=2024-11-05,numberOfPerson=2,isVisit=true
-reservationNumber=3,name=qqq,phoneNumber=01012341234,isVIP=true,isBlackList=false,date=2024-11-05,numberOfPerson=2,isVisit=true

@@ -1,9 +1,8 @@
-package com.sesac.restaurant.common
+package common
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-/* 날짜 처리 object 클래스 */
 object DateHandler {
 
     /** "yyyy-MM-dd" */

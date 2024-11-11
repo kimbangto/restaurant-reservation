@@ -1,36 +1,31 @@
-package com.sesac.restaurant.repository
+package repository
 
-import com.sesac.restaurant.common.MenuMap
-import com.sesac.restaurant.data.FileIO
-import com.sesac.restaurant.model.Menu
+import com.squareup.moshi.Types
+import model.Menu
+import java.io.File
 
-class MenuRepository private constructor(override val fileIO: FileIO, override val className: String = "Menu") : FileRepository<String, Menu> {
+class MenuRepository {
+    private val types = Types.newParameterizedType(Map::class.java, String::class.java, Menu::class.java)
+    private val adapter = Moshi.moshi.adapter<MutableMap<String, Menu>>(types).indent("  ")
+    private val file = File(Moshi.dataPath("menu"))
 
-    companion object {
-        private var instance: MenuRepository? = null
+    fun getMenuMap() = adapter.fromJson(file.readText()) ?: mutableMapOf<String, Menu>()
+    private fun overwriteMenuMap(menuMap: MutableMap<String, Menu>) = file.writeText(adapter.toJson(menuMap))
 
-        fun getInstance(fileIO: FileIO): MenuRepository {
-            return instance ?: synchronized(this) {
-                instance ?: MenuRepository(fileIO).also { instance = it }
-            }
-        }
+    /** 이름으로 메뉴 찾기 */
+    fun findMenuByName(name: String) = getMenuMap()[name]
+
+    /** 메뉴 추가 */
+    fun saveMenu(name: String, price: Int) {
+        val map = getMenuMap()
+        map[name] = Menu(name, price)
+        overwriteMenuMap(map)
     }
 
-    override suspend fun getMap(): MenuMap {
-        val menuMap: MenuMap = mutableMapOf(
-            "백반" to Menu("백반", 8000),
-            "김치찌개" to Menu("김치찌개", 9000),
-            "된장찌개" to Menu("된장찌개", 9000),
-            "비빔밥" to Menu("비빔밥", 10000),
-            "칼국수" to Menu("칼국수", 10000),
-            "오삼불고기" to Menu("오삼불고기", 12000),
-            "제육볶음" to Menu("제육볶음", 12000),
-            "삼계탕" to Menu("삼계탕", 14000)
-        )
-        return menuMap
+    /** 메뉴 삭제 */
+    fun deleteMenuByName(name: String) {
+        val map = getMenuMap()
+        map.remove(name)
+        overwriteMenuMap(map)
     }
-
-    suspend fun saveMenu(menuName: String, price: Int) = fileOverwrite({ list -> list[menuName] = Menu(menuName, price)}, { list -> fileIO.parser.menuMapToString(list)})
-
-    suspend fun deleteMenu(menuName: String) = fileOverwrite({ list -> list.remove(menuName) }, { list -> fileIO.parser.menuMapToString(list)})
 }

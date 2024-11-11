@@ -1,51 +1,33 @@
-package com.sesac.restaurant.service
+package service
 
-import com.sesac.restaurant.data.json.JsonFileIO
-import com.sesac.restaurant.data.txt.TextFileIO
-import com.sesac.restaurant.repository.MenuRepository
+import model.Menu
+import repository.MenuRepository
 
 class MenuManagementService {
-    private val menuRepository = MenuRepository.getInstance(JsonFileIO.getInstance())
+    private val menuRepository = MenuRepository()
 
-    suspend fun getMenu(): List<Pair<String, Int>> {
-        return menuRepository.getMap().map { it.key to it.value.price }
+    fun getMenu(): List<Pair<String, Int>> {
+        val menu = menuRepository.getMenuMap().values.sortedBy { it.price }.map { it.name to it.price }
+        return menu
     }
 
-    suspend fun addMenu(name: String, price: Int): Boolean {
-        val menuMap = menuRepository.getMap()
-
-        if (menuMap.containsKey(name)) {
-            return false
-        } else {
+    fun addMenu(name: String, price: Int): Boolean {
+        if (menuRepository.findMenuByName(name) == null) {
             menuRepository.saveMenu(name, price)
-
             return true
+        } else {
+            return false
         }
     }
 
-    suspend fun updateMenu(index: Int, newName: String, newPrice: Int): Boolean {
+    fun deleteMenu(index: Int): Boolean {
         val menuList = getMenu()
 
         if (index !in menuList.indices) {
             return false
         } else {
             val oldName = menuList[index].first
-            menuRepository.deleteMenu(oldName)
-            menuRepository.saveMenu(newName, newPrice)
-
-            return true
-        }
-    }
-
-    suspend fun deleteMenu(index: Int): Boolean {
-        val menuList = getMenu()
-
-        if (index !in menuList.indices) {
-            return false
-        } else {
-            val oldName = menuList[index].first
-            menuRepository.deleteMenu(oldName)
-
+            menuRepository.deleteMenuByName(oldName)
             return true
         }
     }

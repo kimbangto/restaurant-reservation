@@ -1,46 +1,75 @@
-package com.sesac.restaurant.controller
+package controller
 
-import com.sesac.restaurant.common.ConsoleInput
-import com.sesac.restaurant.service.OrderPayManagementService
+import service.OrderPayManagementService
+import service.TableService
+import view.TableView
 import java.time.LocalDate
 
-class OrderPayManagementController() {
+class OrderPayManagementController {
     private val orderPayService = OrderPayManagementService()
-    private val tableController = TableManagementController()
+    private val tableView = TableView()
+    private val tableService = TableService()
 
-    suspend fun startOrderPay() {
-        println("1. 주문하기 | 2. 결제하기 | 0. 메인콘솔")
-        val input = ConsoleInput.consoleLine()
+    fun startOderPay() {
+        while (true) {
+            println("1. 주문하기 | 2. 결제하기 | 0. 돌아가기")
 
-        when (input) {
-            "1" -> {
-                orderTable()
+            val input = readln()
+
+            when (input) {
+                "1" -> {
+                    orderTable()
+                }
+
+                "2" -> {
+                    payTable()
+                }
+
+                "0" -> {
+                    return
+                }
+
+                else -> {}
             }
-            "2" -> {
-                startPayment()
-            }
-            "0" -> {}
-            else -> {}
         }
     }
 
-    private suspend fun orderTable() {
+    private fun orderTable() {
         val date = LocalDate.now()
-        tableController.showTablesByDate(date)
+        tableView.showTablesByDate(tableService.getTablesByDate(date), date)
 
         println("주문할 테이블 번호를 입력하세요.")
-        val tableNumber = ConsoleInput.consoleLine().toInt()
+        val tableNumber = readln().toInt()
 
         println("주문할 메뉴와 수량을 입력하세요. (예: 비빔밥-1, 제육볶음-2)")
-        val orderInput = ConsoleInput.consoleLine()
+        val orderInput = readln()
         val orderDetails = parseOrderInput(orderInput)
 
-        if (orderPayService.addOrder(date, tableNumber, orderDetails)) {
+        if (orderPayService.saveOrder(date, tableNumber, orderDetails)) {
             println("$tableNumber 에 주문이 성공적으로 추가 되었습니다.")
         } else {
             println("주문 추가에 실패했습니다. 다시 시도해주세요.")
         }
+    }
 
+    private fun payTable() {
+        val date = LocalDate.now()
+        tableView.showTablesByDate(tableService.getTablesByDate(date), date)
+
+        println("결제할 테이블 번호를 입력하세요.")
+        val tableNumber = readln().toInt()
+
+        val totalPrice = orderPayService.getTotalPrice(date, tableNumber)
+        println("총 가격은 $totalPrice 원 입니다.")
+
+        val isSuccess = orderPayService.payOrder(date, tableNumber)
+        println("결제중...")
+
+        if (isSuccess) {
+            println("$totalPrice 원이 결제되었습니다. 감사합니다.")
+        } else {
+            println("결제에 실패하였습니다. 다시시도해주세요.")
+        }
     }
 
     private fun parseOrderInput(input: String): Map<String, Int> {
@@ -62,33 +91,4 @@ class OrderPayManagementController() {
         }
         return orderMap
     }
-
-    private suspend fun showOrderTables() {
-        val date = LocalDate.now()
-        val orderTables = orderPayService.getOrderTables(date)
-
-        if (orderTables.isEmpty()) {
-            println("결제 가능한 테이블이 없습니다.")
-        }
-
-        println("결제 테이블 목록")
-        orderTables.forEach { (tableNumber, tablePrice) ->
-            println("테이블번호: $tableNumber, 총 주문금액: $tablePrice 원")
-        }
-    }
-
-    private suspend fun startPayment() {
-        showOrderTables()
-
-        println("결제할 테이블 번호를 입력하세요.")
-        val tableNumber = ConsoleInput.consoleLine().toInt()
-
-        val date = LocalDate.now()
-        if (orderPayService.processPayment(date, tableNumber)) {
-            println("$tableNumber 번 테이블 결제가 완료되었습니다.")
-        } else {
-            println("결제에 실패하였습니다. 다시 시도해주세요.")
-        }
-    }
-
 }

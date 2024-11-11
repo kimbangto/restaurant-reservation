@@ -1,65 +1,67 @@
-package com.sesac.restaurant.service
+package service
 
-import com.sesac.restaurant.common.TableOrderMap
-import com.sesac.restaurant.data.txt.TextFileIO
-import com.sesac.restaurant.repository.MenuRepository
-import com.sesac.restaurant.repository.PaidTableRepository
-import com.sesac.restaurant.repository.TableRepository
+import repository.MenuRepository
+import repository.PaidTableRepository
+import repository.TableRepository
 import java.time.LocalDate
 
 class OrderPayManagementService {
-    private val tableRepository = TableRepository.getInstance(TextFileIO.getInstance())
-    private val menuRepository = MenuRepository.getInstance(TextFileIO.getInstance())
-    private val paidRepository = PaidTableRepository.getInstance(TextFileIO.getInstance())
+    private val tableRepository = TableRepository()
+    private val menuRepository = MenuRepository()
+    private val paidTableRepository = PaidTableRepository()
 
-    suspend fun addOrder(date: LocalDate, tableNumber: Int, orderDetails: Map<String, Int>): Boolean {
-        val menuMap = menuRepository.getMap()
-        val tableOrderMap: TableOrderMap = mutableMapOf()
+    fun saveOrder(date: LocalDate, tableNumber: Int, orderDetails: Map<String, Int>): Boolean {
+        val menuMap = menuRepository.getMenuMap()
+        val table = tableRepository.findByDateAndTableNumber(date, tableNumber)
+        val reservation = table.reservation ?: return false
+        val tableOrderMap: MutableMap<String, Int> = table.tableOrder?.toMutableMap() ?: mutableMapOf()
 
-        orderDetails.forEach {(menuName, amount) ->
+        orderDetails.forEach { (menuName, amount) ->
             val menu = menuMap[menuName]
             if (menu != null) {
-                tableOrderMap[menu] = amount
+                tableOrderMap[menu.name] = tableOrderMap.getOrDefault(menu.name, 0) + amount
             } else {
-                println("존재하지 않는 메뉴: $menuName")
                 return false
             }
         }
 
-        if (tableOrderMap.isNotEmpty()) {
-            tableRepository.orderTable(date, tableNumber, tableOrderMap)
-            return true
-        } else {
-            return false
-        }
+        table.tableOrder = tableOrderMap
+        tableRepository.setReservationAtTable(reservation, tableNumber, tableOrderMap)
+
+        return true
     }
 
-    suspend fun getOrderTables(date: LocalDate): Map<Int, Int> {
-        val tables = tableRepository.getTableListByDate(date)
-        val orderTables = tables.filter { it.value.tableOrderMap != null }
-            .mapValues { (_, table) ->
-                table.tableOrderMap!!.entries.sumOf { (menu, amount) -> menu.price * amount}
-            }
+    fun payOrder(date: LocalDate, tableNumber: Int): Boolean {
+        val table = tableRepository.findByDateAndTableNumber(date, tableNumber)
+        val tableOrder = table.tableOrder
 
-        return orderTables
-    }
-
-    suspend fun processPayment(date: LocalDate, tableNumber: Int): Boolean {
-        val tables = tableRepository.getTableListByDate(date)
-        val table = tables[tableNumber]
-
-        if (table?.tableOrderMap != null) {
-            // 결제할 데이터 준비
-            val tableOrderMap = table.tableOrderMap!!
-
-            // 결제 정보 저장
-            paidRepository.savePaidTable(date, tableOrderMap)
-
-            // 예약 정보 삭제
-            tableRepository.deleteTableReservation(date, tableNumber)
-            return true
-        } else {
+        if (tableOrder.isNullOrEmpty()) {
             return false
         }
+
+        val totalPrice = tableOrder.entries.sumOf { (menuName, amount) ->
+            val price = menuRepository.findMenuByName(menuName)?.price ?: 0
+            price * amount
+        }
+
+        println("총 결제 금액: $totalPrice 원")
+
+        paidTableRepository.setPaidTableForDate(date, tableOrder)
+
+        tableRepository.deleteTableByDateAndTableNumber(date, tableNumber)
+
+        return true
+    }
+
+    fun getTotalPrice(date: LocalDate, tableNumber: Int): Int {
+        val table = tableRepository.findByDateAndTableNumber(date, tableNumber)
+        val tableOrder = table.tableOrder
+
+        val totalPrice = tableOrder?.entries?.sumOf { (menuName, amount) ->
+            val price = menuRepository.findMenuByName(menuName)?.price ?: 0
+            price * amount
+        } ?: 0
+
+        return totalPrice
     }
 }

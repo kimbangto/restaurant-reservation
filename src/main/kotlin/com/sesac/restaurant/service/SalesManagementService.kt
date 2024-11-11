@@ -1,51 +1,73 @@
-package com.sesac.restaurant.service
+package service
 
-import com.sesac.restaurant.data.json.JsonFileIO
-import com.sesac.restaurant.data.txt.TextFileIO
-import com.sesac.restaurant.model.*
-import com.sesac.restaurant.repository.PaidTableRepository
+import repository.MenuRepository
+import repository.PaidTableRepository
 import java.time.LocalDate
-import java.time.temporal.WeekFields
-import java.util.Locale
+import java.time.format.DateTimeFormatter
 
 class SalesManagementService {
-    private val paidTableRepository = PaidTableRepository.getInstance(JsonFileIO.getInstance())
+    private val paidTableRepository = PaidTableRepository()
+    private val menuRepository = MenuRepository()
 
-    /**"결제된 테이블을 가져와서 일별 매출 계산 함수"*/
-    suspend fun getDailySales(): Map<LocalDate, Int> {
-        val paidTables = paidTableRepository.getMap()
-        val todaySales = paidTables.mapValues { (_, tableOrderMap) ->
-            tableOrderMap.entries.sumOf { (menu, amount) -> menu.price * amount }
+    fun getDailySales(date: LocalDate): Int {
+        val paidTables = paidTableRepository.getPaidTableMapByDate(date)
+        val totalPrice = paidTables.sumOf { paidTable ->
+            paidTable.tableOrder.entries.sumOf { (menuName, amount) ->
+                val price = menuRepository.findMenuByName(menuName)?.price ?: 0
+                price * amount
+            }
         }
-
-        return todaySales
+        return totalPrice
     }
 
-    // Todo 두개의 주가 나오니 주별로 출력되게 새로 map해야할듯
-    /**"결제된 테이블을 가져와서 주별 매출 계산 함수"*/
-    suspend fun getWeeklySales(): Int {
+    fun getWeeklySales(): Map<String, Int> {
         val today = LocalDate.now()
-        val weekField = WeekFields.of(Locale.getDefault())
-        val currentWeek = today.get(weekField.weekOfWeekBasedYear())
-        val paidTables = paidTableRepository.getMap()
+        val startDate = today.minusDays(6) // 오늘 포함 최근 7일
 
-        val weeklySales = paidTables.filter { (date, _) ->
-            date.get(weekField.weekOfWeekBasedYear()) == currentWeek
-        }.values.sumOf { tableOrderMap ->
-            tableOrderMap.entries.sumOf { (menu, amount) -> menu.price * amount }
+        val salesByWeek = mutableMapOf<String, Int>()
+
+        (0..6).forEach { dayOffset ->
+            val date = startDate.plusDays(dayOffset.toLong())
+            val dailySales = paidTableRepository.getPaidTableMapByDate(date).sumOf { paidTable ->
+                paidTable.tableOrder.entries.sumOf { (menuName, quantity) ->
+                    val price = menuRepository.findMenuByName(menuName)?.price ?: 0
+                    price * quantity
+                }
+            }
+
+            val weekLabel = getWeekLabel(date)
+            salesByWeek[weekLabel] = salesByWeek.getOrDefault(weekLabel, 0) + dailySales
         }
 
-        return weeklySales
+        return salesByWeek
     }
 
-    /**"결제된 테이블을 가져와서 메뉴별 매출 계산 함수"*/
-    suspend fun getMenuSales(): Map<Menu, Int> {
-        val paidTables = paidTableRepository.getMap()
-        val menuSales = paidTables.values
-            .flatMap { it.entries.map { entry -> entry.key to entry.value } }
-            .groupBy { it.first }
-            .mapValues { (_, pairs) -> pairs.sumOf { (menu, amount) -> menu.price * amount } }
+    fun getSalesByMenu(): Map<String, Int> {
+        val salesByMenu = mutableMapOf<String, Int>()
 
-        return menuSales
+        val paidTableMap = paidTableRepository.getPaidTableMap()
+
+        paidTableMap.values.flatten().forEach { paidTable ->
+            paidTable.tableOrder.forEach { (menuName, quantity) ->
+                val price = menuRepository.findMenuByName(menuName)?.price ?: 0
+
+                salesByMenu[menuName] = salesByMenu.getOrDefault(menuName, 0) + (price * quantity)
+            }
+        }
+
+        return salesByMenu
+    }
+
+    private fun getWeekLabel(date: LocalDate): String {
+        val dayOfWeek = date.dayOfWeek.value
+        val startOfWeek = date.minusDays((dayOfWeek - 1).toLong())
+        val endOfWeek = startOfWeek.plusDays(6 - dayOfWeek.toLong()).coerceAtMost(LocalDate.now())
+
+        return "${startOfWeek.monthValue}/${startOfWeek.dayOfMonth} ~ ${endOfWeek.monthValue}/${endOfWeek.dayOfMonth}"
+    }
+
+    fun formatDate(date: LocalDate): String {
+        val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
+        return date.format(dateFormatter)
     }
 }

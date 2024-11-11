@@ -1,71 +1,64 @@
-package com.sesac.restaurant.controller
+package controller
 
-import com.sesac.restaurant.common.ConsoleInput
-import com.sesac.restaurant.service.SalesManagementService
+import service.SalesManagementService
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.WeekFields
-import java.util.*
 
 class SalesManagementController {
     private val salesService = SalesManagementService()
 
-    suspend fun startSalesManagement() {
-        println("1. 결제기능 | 2. 일별매출 | 3. 주별매출 | 4. 메뉴별매출")
+    fun startSalesManagement() {
+        while (true) {
+            println("1. 일별매출 | 2. 주별매출 | 3. 메뉴별매출 | 0. 돌아가기")
 
-        val input = ConsoleInput.consoleLine()
-        when (input) {
-            "1" -> {
-                // Todo 결제기능
+            val input = readln()
+
+            when (input) {
+                "1" -> {
+                    showDailySales()
+                }
+
+                "2" -> {
+                    showWeeklySales()
+                }
+
+                "3" -> {
+                    showSalesByMenu()
+                }
+
+                "0" -> {
+                    return
+                }
+
+                else -> {}
             }
-            "2" -> {
-                showDailySales()
-            }
-            "3" -> {
-                showWeeklySales()
-            }
-            "4" -> {
-                showMenuSales()
-            }
-            else -> {}
         }
     }
+    private fun showDailySales() {
+        val date = LocalDate.now()
+        val dailySales = salesService.getDailySales(date)
 
-    /**"SalesService를 통해 가져온 일별 매출을 출력"*/
-    private suspend fun showDailySales() {
-        println("일별 매출")
-        val dailySales = salesService.getDailySales()
-        dailySales.forEach { (date, sales) ->
-            println("${date.monthValue}/${date.dayOfMonth}: $sales 원")
-        }
-
-        return startSalesManagement()
+        print(salesService.formatDate(date))
+        println(" 매출")
+        println("$dailySales 원")
     }
 
-    /**SalesService를 통해 가져온 주별 매출을 출력*/
-    private suspend fun showWeeklySales() {
-        println("금주매출")
-        val today = LocalDate.now()
-        val weekField = WeekFields.of(Locale.getDefault())
-        val formatter = DateTimeFormatter.ofPattern("MM/dd")
-
-        val startOfWeek = today.with(weekField.dayOfWeek(), 1).format(formatter)
-        val endOfWeek = today.with(weekField.dayOfWeek(), 7).format(formatter)
-
+    /** 주별 매출 출력 */
+    private fun showWeeklySales() {
         val weeklySales = salesService.getWeeklySales()
-        println("주별 매출 $startOfWeek ~ $endOfWeek : $weeklySales 원")
 
-        return startSalesManagement()
+        println("주별 매출:")
+        weeklySales.forEach { (week, sales) ->
+            println("$week 매출: $sales 원")
+        }
     }
 
-    /**SalesService를 통해 가져온 메뉴별 매출을 출력*/
-    private suspend fun showMenuSales() {
-        val menuSales = salesService.getMenuSales()
-        println("메뉴별 매출")
-        menuSales.forEach { (menu, sales) ->
-            println("${menu.name}: $sales 원")
-        }
+    /** 메뉴별 매출 출력 */
+    private fun showSalesByMenu() {
+        val salesByMenu = salesService.getSalesByMenu()
 
-        return startSalesManagement()
+        println("메뉴별 매출")
+        salesByMenu.forEach { (menuName, totalSales) ->
+            println("$menuName = $totalSales 원")
+        }
     }
 }
