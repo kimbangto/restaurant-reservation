@@ -1,7 +1,7 @@
 package service
 
-import repository.MenuRepository
-import repository.PaidTableRepository
+import com.sesac.restaurant.repository.MenuRepository
+import com.sesac.restaurant.repository.PaidTableRepository
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -45,7 +45,7 @@ class SalesManagementService {
     fun getSalesByMenu(): Map<String, Int> {
         val salesByMenu = mutableMapOf<String, Int>()
 
-        val paidTableMap = paidTableRepository.getPaidTableMap()
+        val paidTableMap = paidTableRepository.getMap()
 
         paidTableMap.values.flatten().forEach { paidTable ->
             paidTable.tableOrder.forEach { (menuName, quantity) ->

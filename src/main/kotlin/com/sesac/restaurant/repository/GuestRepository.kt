@@ -1,33 +1,32 @@
-package repository
+package com.sesac.restaurant.repository
 
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Types
 import model.Guest
 import java.io.File
+import java.lang.reflect.ParameterizedType
 
-class GuestRepository {
-    private val types = Types.newParameterizedType(Map::class.java, String::class.java, Guest::class.java)
-    private val adapter = Moshi.moshi.adapter<MutableMap<String, Guest>>(types).indent("  ")
-    private val file = File(Moshi.dataPath("guest"))
-
-    fun getGuestMap() = adapter.fromJson(file.readText()) ?: mutableMapOf<String, Guest>()
-    private fun overwriteGuestMap(guestMap: MutableMap<String, Guest>) = file.writeText(adapter.toJson(guestMap))
+class GuestRepository: RepositoryInterface<String, Guest> {
+    override val types: ParameterizedType = Types.newParameterizedType(Map::class.java, String::class.java, Guest::class.java)
+    override val adapter: JsonAdapter<MutableMap<String, Guest>> = Moshi.moshi.adapter<MutableMap<String, Guest>>(types).indent("  ")
+    override val file = File(Moshi.dataPath("guest"))
 
     /** 핸드폰 번호로 예약자 찾기 */
-    fun findGuestByPhoneNumber(phoneNumber: String) = getGuestMap()[phoneNumber]
+    fun findGuestByPhoneNumber(phoneNumber: String) = getMap()[phoneNumber]
 
     /** 예약자 정보 저장 */
     fun saveGuest(guest: Guest) {
-        val map = getGuestMap()
+        val map = getMap()
         map[guest.phoneNumber] = guest
-        overwriteGuestMap(map)
+        overwriteMap(map)
     }
 
     /** 블랙리스트에서 제거 */
     fun removeBlackList(phoneNumber: String) {
-        val map = getGuestMap()
+        val map = getMap()
         val guest = map[phoneNumber]
 
         guest?.isBlackList = false
-        overwriteGuestMap(map)
+        overwriteMap(map)
     }
 }

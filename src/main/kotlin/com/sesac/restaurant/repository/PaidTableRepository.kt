@@ -1,29 +1,25 @@
-package repository
+package com.sesac.restaurant.repository
 
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Types
 import model.PaidTable
 import java.io.File
+import java.lang.reflect.ParameterizedType
 import java.time.LocalDate
 
-class PaidTableRepository {
-    private val types = Types.newParameterizedType(MutableMap::class.java, LocalDate::class.java, MutableList::class.java, PaidTable::class.java)
-    private val adapter = Moshi.moshi.adapter<MutableMap<LocalDate, MutableList<PaidTable>>>(types).indent("  ")
-    private val file = File(Moshi.dataPath("paid"))
-
-    fun getPaidTableMap() = adapter.fromJson(file.readText()) ?: mutableMapOf<LocalDate, MutableList<PaidTable>>()
-
-    private fun overwritePaidTableMap(paidTableMap: MutableMap<LocalDate, MutableList<PaidTable>>) {
-        file.writeText(adapter.toJson(paidTableMap))
-    }
+class PaidTableRepository: RepositoryInterface<LocalDate, MutableList<PaidTable>> {
+    override val types: ParameterizedType = Types.newParameterizedType(MutableMap::class.java, LocalDate::class.java, MutableList::class.java, PaidTable::class.java)
+    override val adapter: JsonAdapter<MutableMap<LocalDate, MutableList<PaidTable>>> = Moshi.moshi.adapter<MutableMap<LocalDate, MutableList<PaidTable>>>(types).indent("  ")
+    override val file = File(Moshi.dataPath("paid"))
 
     /** 해당 날짜의 결제된 테이블 목록 반환 */
     fun getPaidTableMapByDate(date: LocalDate): List<PaidTable> {
-        return getPaidTableMap()[date] ?: emptyList()
+        return getMap()[date] ?: emptyList()
     }
 
     /** 특정 날짜에 결제 내역 추가 */
     fun setPaidTableForDate(date: LocalDate, newTableOrder: Map<String, Int>) {
-        val map = getPaidTableMap()
+        val map = getMap()
         val paidTableList = map.getOrPut(date) { mutableListOf() }
 
         if (paidTableList.isNotEmpty()) {
@@ -40,6 +36,6 @@ class PaidTableRepository {
             paidTableList.add(paidTable)
         }
 
-        overwritePaidTableMap(map)
+        overwriteMap(map)
     }
 }

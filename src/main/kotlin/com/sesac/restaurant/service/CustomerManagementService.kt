@@ -1,17 +1,17 @@
 package service
 
 import model.Guest
-import repository.GuestRepository
+import com.sesac.restaurant.repository.GuestRepository
 
 class CustomerManagementService {
     private val guestRepository = GuestRepository()
 
     fun getVipList(): List<Guest> {
-        return guestRepository.getGuestMap().values.filter { it.isVIP }
+        return guestRepository.getMap().values.filter { it.isVIP }
     }
 
     fun getBlackList(): List<Guest> {
-        return guestRepository.getGuestMap().values.filter { it.isBlackList }
+        return guestRepository.getMap().values.filter { it.isBlackList }
     }
 
     fun deleteBlackList(index: Int): Boolean {

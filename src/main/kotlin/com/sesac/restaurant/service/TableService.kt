@@ -3,7 +3,7 @@ package service
 import model.Order
 import model.Reservation
 import model.Table
-import repository.TableRepository
+import com.sesac.restaurant.repository.TableRepository
 import java.time.LocalDate
 
 class TableService(private val repository: TableRepository = TableRepository()) {

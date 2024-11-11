@@ -45,3 +45,4 @@ bin/
 .DS_Store
 
 /src/main/kotlin/com/sesac/restaurant/data/txt/db/*
+/src/main/kotlin/com/sesac/restaurant/data/

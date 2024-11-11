@@ -1,6 +1,6 @@
 package controller
 
-import service.MenuManagementService
+import com.sesac.restaurant.service.MenuManagementService
 
 class MenuManagementController {
     private val menuService = MenuManagementService()
