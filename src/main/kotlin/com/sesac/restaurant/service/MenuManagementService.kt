@@ -1,13 +1,12 @@
-package service
+package com.sesac.restaurant.service
 
-import model.Menu
-import repository.MenuRepository
+import com.sesac.restaurant.repository.MenuRepository
 
 class MenuManagementService {
     private val menuRepository = MenuRepository()
 
     fun getMenu(): List<Pair<String, Int>> {
-        val menu = menuRepository.getMenuMap().values.sortedBy { it.price }.map { it.name to it.price }
+        val menu = menuRepository.getMap().values.sortedBy { it.price }.map { it.name to it.price }
         return menu
     }
 

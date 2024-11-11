@@ -1,31 +1,30 @@
-package repository
+package com.sesac.restaurant.repository
 
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Types
 import model.Menu
 import java.io.File
+import java.lang.reflect.ParameterizedType
 
-class MenuRepository {
-    private val types = Types.newParameterizedType(Map::class.java, String::class.java, Menu::class.java)
-    private val adapter = Moshi.moshi.adapter<MutableMap<String, Menu>>(types).indent("  ")
-    private val file = File(Moshi.dataPath("menu"))
-
-    fun getMenuMap() = adapter.fromJson(file.readText()) ?: mutableMapOf<String, Menu>()
-    private fun overwriteMenuMap(menuMap: MutableMap<String, Menu>) = file.writeText(adapter.toJson(menuMap))
+class MenuRepository: RepositoryInterface<String, Menu> {
+    override val types: ParameterizedType = Types.newParameterizedType(Map::class.java, String::class.java, Menu::class.java)
+    override val adapter: JsonAdapter<MutableMap<String, Menu>> = Moshi.moshi.adapter<MutableMap<String, Menu>>(types).indent("  ")
+    override val file = File(Moshi.dataPath("menu"))
 
     /** 이름으로 메뉴 찾기 */
-    fun findMenuByName(name: String) = getMenuMap()[name]
+    fun findMenuByName(name: String) = getMap()[name]
 
     /** 메뉴 추가 */
     fun saveMenu(name: String, price: Int) {
-        val map = getMenuMap()
+        val map = getMap()
         map[name] = Menu(name, price)
-        overwriteMenuMap(map)
+        overwriteMap(map)
     }
 
     /** 메뉴 삭제 */
     fun deleteMenuByName(name: String) {
-        val map = getMenuMap()
+        val map = getMap()
         map.remove(name)
-        overwriteMenuMap(map)
+        overwriteMap(map)
     }
 }

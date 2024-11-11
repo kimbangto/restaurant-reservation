@@ -1,7 +1,7 @@
 package service
 
 import model.Guest
-import repository.GuestRepository
+import com.sesac.restaurant.repository.GuestRepository
 
 class GuestService(private val repository: GuestRepository = GuestRepository()) {
 

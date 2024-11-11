@@ -1,8 +1,8 @@
 package service
 
-import repository.MenuRepository
-import repository.PaidTableRepository
-import repository.TableRepository
+import com.sesac.restaurant.repository.MenuRepository
+import com.sesac.restaurant.repository.PaidTableRepository
+import com.sesac.restaurant.repository.TableRepository
 import java.time.LocalDate
 
 class OrderPayManagementService {
@@ -11,7 +11,7 @@ class OrderPayManagementService {
     private val paidTableRepository = PaidTableRepository()
 
     fun saveOrder(date: LocalDate, tableNumber: Int, orderDetails: Map<String, Int>): Boolean {
-        val menuMap = menuRepository.getMenuMap()
+        val menuMap = menuRepository.getMap()
         val table = tableRepository.findByDateAndTableNumber(date, tableNumber)
         val reservation = table.reservation ?: return false
         val tableOrderMap: MutableMap<String, Int> = table.tableOrder?.toMutableMap() ?: mutableMapOf()

@@ -1,14 +1,13 @@
-package service
+package com.sesac.restaurant.service
 
-import model.Guest
 import model.Reservation
-import repository.ReservationRepository
+import com.sesac.restaurant.repository.ReservationRepository
 import java.time.LocalDate
 
 class ReservationService(private val repository: ReservationRepository = ReservationRepository()) {
 
     /** 오늘부터의 예약 모두 반환 */
-    private fun getReservation() = repository.getReservationMap().filter { LocalDate.now() <= it.value.visitDate }
+    private fun getReservation() = repository.getMap().filter { LocalDate.now() <= it.value.visitDate }
 
     /** 예약번호로 예약 반환 */
     fun findByReservationNumber(reservationNumber: Int) = repository.findReservationByReservationNumber(reservationNumber)
@@ -17,14 +16,14 @@ class ReservationService(private val repository: ReservationRepository = Reserva
     fun getMyReservation(phoneNumber: String) = getReservation().filter { it.value.guest.phoneNumber == phoneNumber }
 
     /** 오늘자 예약 반환 */
-    fun getDayReservation() = repository.getReservationMap().filter { it.value.visitDate == LocalDate.now() }
+    fun getDayReservation() = repository.getMap().filter { it.value.visitDate == LocalDate.now() }
 
     /** 오늘로부터 일주일치 예약 반환 */
-    fun getWeekReservation() = repository.getReservationMap().filter {  LocalDate.now() <= it.value.visitDate && it.value.visitDate <= LocalDate.now().plusDays(6) }
+    fun getWeekReservation() = repository.getMap().filter {  LocalDate.now() <= it.value.visitDate && it.value.visitDate <= LocalDate.now().plusDays(6) }
 
     /** 예약번호 중 가장 큰 숫자 + 1 반환 */
     fun createNewReservationNumber(): Int {
-        val map = repository.getReservationMap()
+        val map = repository.getMap()
         return if(map.keys.isEmpty()) 1
         else map.keys.max() + 1
     }

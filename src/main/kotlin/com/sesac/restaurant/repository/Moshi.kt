@@ -1,4 +1,4 @@
-package repository
+package com.sesac.restaurant.repository
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Moshi
